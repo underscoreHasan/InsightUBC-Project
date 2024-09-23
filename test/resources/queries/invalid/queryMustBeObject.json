@@ -1,0 +1,10 @@
+{
+	"title": "queryMustBeObject",
+	"input": [
+		99,
+		43,
+		50
+	],
+	"errorExpected": true,
+	"expected": "InsightError"
+}

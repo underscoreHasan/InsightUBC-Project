@@ -1,0 +1,28 @@
+{
+	"title": "wrong Key Field",
+	"input": {
+	"WHERE": {
+		"AND": [
+			"sections_det": "*th",
+			"sections_year": 2020
+		]
+	},
+	"OPTIONS": {
+		"COLUMNS": [
+			"sections_avg",
+			"sections_pass",
+			"sections_fail",
+			"sections_audit",
+			"sections_year",
+			"sections_dept",
+			"sections_id",
+			"sections_instructor",
+			"sections_title",
+			"sections_uuid"
+		],
+		"ORDER": "sections_uuid"
+	}
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}
