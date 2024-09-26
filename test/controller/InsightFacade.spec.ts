@@ -77,7 +77,7 @@ describe("InsightFacade", function () {
 		//rejections due to dataset id
 		it("should reject with an empty dataset id", async function () {
 			try {
-				await facade.addDataset("", oneCourse, InsightDatasetKind.Sections);
+				await facade.addDataset("", sections, InsightDatasetKind.Sections);
 				expect.fail("Should have thrown!");
 			} catch (err) {
 				expect(err).to.be.instanceOf(InsightError);
@@ -86,7 +86,7 @@ describe("InsightFacade", function () {
 
 		it("should reject with a whitespace dataset id", async function () {
 			try {
-				await facade.addDataset("   ", oneCourse, InsightDatasetKind.Sections);
+				await facade.addDataset("   ", sections, InsightDatasetKind.Sections);
 				expect.fail("Should have thrown!");
 			} catch (err) {
 				expect(err).to.be.instanceOf(InsightError);
@@ -95,7 +95,7 @@ describe("InsightFacade", function () {
 
 		it("should reject with a _ dataset id", async function () {
 			try {
-				await facade.addDataset("_", oneCourse, InsightDatasetKind.Sections);
+				await facade.addDataset("_", sections, InsightDatasetKind.Sections);
 				expect.fail("Should have thrown!");
 			} catch (err) {
 				expect(err).to.be.instanceOf(InsightError);
@@ -106,7 +106,7 @@ describe("InsightFacade", function () {
 			try {
 				await facade.addDataset(
 					"_dataset",
-					oneCourse,
+					sections,
 					InsightDatasetKind.Sections
 				);
 				expect.fail("Should have thrown!");
@@ -119,7 +119,7 @@ describe("InsightFacade", function () {
 			try {
 				await facade.addDataset(
 					"dataset_",
-					oneCourse,
+					sections,
 					InsightDatasetKind.Sections
 				);
 				expect.fail("Should have thrown!");
@@ -132,7 +132,7 @@ describe("InsightFacade", function () {
 			try {
 				await facade.addDataset(
 					"data_set",
-					oneCourse,
+					sections,
 					InsightDatasetKind.Sections
 				);
 				expect.fail("Should have thrown!");
