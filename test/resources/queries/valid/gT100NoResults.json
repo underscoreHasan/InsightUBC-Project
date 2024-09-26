@@ -1,0 +1,26 @@
+{
+	"title": "GT100NoResults",
+	"input": {
+		"WHERE": {
+			"GT": {
+				"sections_avg": 100
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"sections_avg",
+				"sections_pass",
+				"sections_fail",
+				"sections_audit",
+				"sections_year",
+				"sections_dept",
+				"sections_id",
+				"sections_instructor",
+				"sections_title",
+				"sections_uuid"
+			]
+		}
+	},
+	"errorExpected": false,
+	"expected": []
+}
