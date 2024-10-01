@@ -197,10 +197,10 @@ describe("InsightFacade", function () {
 
 		it("should reject when no valid sections", async function () {
 			try {
-				const res = await facade.addDataset("noValidSections", noValidSections, InsightDatasetKind.Sections);
-				expect(res).to.be.deep.equals(["noValidSections"]);
-			} catch {
-				expect.fail("Should not have thrown!");
+				await facade.addDataset("noValidSections", noValidSections, InsightDatasetKind.Sections);
+				expect.fail("Should have thrown!");
+			} catch (err) {
+				expect(err).to.be.instanceOf(InsightError);
 			}
 		});
 

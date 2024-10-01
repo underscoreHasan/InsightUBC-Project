@@ -1,6 +1,6 @@
-import {IInsightFacade, InsightDataset, InsightDatasetKind, InsightError, InsightResult} from "./IInsightFacade";
+import { IInsightFacade, InsightDataset, InsightDatasetKind, InsightError, InsightResult } from "./IInsightFacade";
 import JSZip from "jszip";
-import {rejects} from "node:assert";
+import { rejects } from "node:assert";
 
 /**
  * This is the main programmatic entry point for the project.
@@ -8,36 +8,46 @@ import {rejects} from "node:assert";
  *
  */
 export default class InsightFacade implements IInsightFacade {
+	private datasetIDs: string[] = [];
+
 	public async addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
 		if (this.validId(id)) {
+			// Validate that content represents a valid ZIP file
 			try {
-				const zip = await JSZip.loadAsync(content, {base64:true});
+				const zip = await JSZip.loadAsync(content, { base64: true });
 			} catch (err) {
-				throw(new InsightError("JSZip threw error:"));
+				if (err instanceof Error) {
+					throw new InsightError("JSZip threw error: " + err.message);
+				} else {
+					// Handle unexpected errors
+					throw new InsightError("An unknown error occurred.");
+				}
 			}
-			return([id])
+
+			this.datasetIDs.push(id);
+			return this.datasetIDs;
 		} else {
-			throw(new InsightError("id was invalid!"));
+			throw new InsightError("id was invalid!");
 		}
 
 		/*
-		* An id is invalid if it contains an underscore, or is only whitespace characters.
-		* If id is the same as the id of an already added dataset, the dataset should be rejected and not saved.
-		*/
+		 * An id is invalid if it contains an underscore, or is only whitespace characters.
+		 * If id is the same as the id of an already added dataset, the dataset should be rejected and not saved.
+		 */
 
 		/* After receiving the dataset, it should be processed into a data structure of
-		* your design. The processed data structure should be persisted to disk; your
-		* system should be able to load this persisted value into memory for answering
-		* queries.
-		*
-		* Ultimately, a dataset must be added or loaded from disk before queries can
-		* be successfully answered.
-		*/
+		 * your design. The processed data structure should be persisted to disk; your
+		 * system should be able to load this persisted value into memory for answering
+		 * queries.
+		 *
+		 * Ultimately, a dataset must be added or loaded from disk before queries can
+		 * be successfully answered.
+		 */
 	}
 
 	private validId(id: string): boolean {
 		const regex = new RegExp("^[^_]+$");
-		return regex.test(id) && id.trim().length !== 0;
+		return regex.test(id) && id.trim().length !== 0 && !this.datasetIDs.includes(id);
 	}
 
 	public async removeDataset(id: string): Promise<string> {
