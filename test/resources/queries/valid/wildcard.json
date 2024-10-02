@@ -1,0 +1,53 @@
+{
+	"title": "querying with a wildcard",
+	"input": {
+		"WHERE": {
+			"IS": {
+				"sections_dept": "z*"
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": ["sections_dept", "sections_id"],
+			"ORDER": "sections_id"
+		}
+	},
+	"errorExpected": false,
+	"expected": [
+		{ "sections_dept": "zool", "sections_id": "503" },
+		{ "sections_dept": "zool", "sections_id": "503" },
+		{ "sections_dept": "zool", "sections_id": "503" },
+		{ "sections_dept": "zool", "sections_id": "503" },
+		{ "sections_dept": "zool", "sections_id": "503" },
+		{ "sections_dept": "zool", "sections_id": "503" },
+		{ "sections_dept": "zool", "sections_id": "503" },
+		{ "sections_dept": "zool", "sections_id": "503" },
+		{ "sections_dept": "zool", "sections_id": "503" },
+		{ "sections_dept": "zool", "sections_id": "503" },
+		{ "sections_dept": "zool", "sections_id": "503" },
+		{ "sections_dept": "zool", "sections_id": "503" },
+		{ "sections_dept": "zool", "sections_id": "503" },
+		{ "sections_dept": "zool", "sections_id": "503" },
+		{ "sections_dept": "zool", "sections_id": "549" },
+		{ "sections_dept": "zool", "sections_id": "549" },
+		{ "sections_dept": "zool", "sections_id": "549" },
+		{ "sections_dept": "zool", "sections_id": "549" },
+		{ "sections_dept": "zool", "sections_id": "549" },
+		{ "sections_dept": "zool", "sections_id": "549" },
+		{ "sections_dept": "zool", "sections_id": "549" },
+		{ "sections_dept": "zool", "sections_id": "549" },
+		{ "sections_dept": "zool", "sections_id": "549" },
+		{ "sections_dept": "zool", "sections_id": "549" },
+		{ "sections_dept": "zool", "sections_id": "549" },
+		{ "sections_dept": "zool", "sections_id": "549" },
+		{ "sections_dept": "zool", "sections_id": "549" },
+		{ "sections_dept": "zool", "sections_id": "549" },
+		{ "sections_dept": "zool", "sections_id": "549" },
+		{ "sections_dept": "zool", "sections_id": "549" },
+		{ "sections_dept": "zool", "sections_id": "549" },
+		{ "sections_dept": "zool", "sections_id": "549" },
+		{ "sections_dept": "zool", "sections_id": "549" },
+		{ "sections_dept": "zool", "sections_id": "549" },
+		{ "sections_dept": "zool", "sections_id": "549" },
+		{ "sections_dept": "zool", "sections_id": "549" }
+	]
+}
