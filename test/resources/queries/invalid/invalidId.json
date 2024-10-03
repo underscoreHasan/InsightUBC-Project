@@ -1,0 +1,18 @@
+{
+	"title": "invalid id",
+	"input": {
+		"WHERE": {
+			"IS": {
+				"burger_dept": "math"
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"burger_dept"
+			],
+			"ORDER": "burger_dept"
+		}
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}
