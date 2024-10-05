@@ -1,5 +1,7 @@
 import { IInsightFacade, InsightDataset, InsightDatasetKind, InsightError, InsightResult } from "./IInsightFacade";
 import JSZip from "jszip";
+import Dataset from "./Dataset";
+import Section from "./Section";
 import { rejects } from "node:assert";
 
 /**
@@ -9,12 +11,15 @@ import { rejects } from "node:assert";
  */
 export default class InsightFacade implements IInsightFacade {
 	private datasetIDs: string[] = [];
+	private datasets: Dataset[] = [];
 
 	public async addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
 		if (this.validId(id)) {
+			let zip: JSZip;
+			// Validate that id is not a duplicate and is formatted correctly
 			// Validate that content represents a valid ZIP file
 			try {
-				const zip = await JSZip.loadAsync(content, { base64: true });
+				zip = await JSZip.loadAsync(content, { base64: true });
 			} catch (err) {
 				if (err instanceof Error) {
 					throw new InsightError("JSZip threw error: " + err.message);
@@ -24,25 +29,46 @@ export default class InsightFacade implements IInsightFacade {
 				}
 			}
 
-			this.datasetIDs.push(id);
+			const filePromises = Object.keys(zip.files)
+				.filter((fileName) => fileName.startsWith("courses/") && !zip.files[fileName].dir)
+				.map(async (fileName) => {
+					const file = zip.files[fileName];
+
+					try {
+						const fileContent = await file.async("text");
+						const parsedJSON = JSON.parse(fileContent);
+
+						if (parsedJSON && Array.isArray(parsedJSON.result)) {
+							parsedJSON.result.forEach((section: any) => {
+								if (
+									"id" in section &&
+									"Course" in section &&
+									"Title" in section &&
+									"Professor" in section &&
+									"Subject" in section &&
+									"Year" in section &&
+									"Avg" in section &&
+									"Pass" in section &&
+									"Fail" in section &&
+									"Audit" in section
+								) {
+									//only valid sections come through to here
+								}
+							});
+						}
+					} catch {
+						console.log(`Error processing file ${fileName}`);
+						throw new InsightError(`Error processing file ${fileName}`);
+					}
+				});
+
+			//TODO: parse the json files inside the courses folder
+
+			// this.datasetIDs.push(id);
 			return this.datasetIDs;
 		} else {
 			throw new InsightError("id was invalid!");
 		}
-
-		/*
-		 * An id is invalid if it contains an underscore, or is only whitespace characters.
-		 * If id is the same as the id of an already added dataset, the dataset should be rejected and not saved.
-		 */
-
-		/* After receiving the dataset, it should be processed into a data structure of
-		 * your design. The processed data structure should be persisted to disk; your
-		 * system should be able to load this persisted value into memory for answering
-		 * queries.
-		 *
-		 * Ultimately, a dataset must be added or loaded from disk before queries can
-		 * be successfully answered.
-		 */
 	}
 
 	private validId(id: string): boolean {
