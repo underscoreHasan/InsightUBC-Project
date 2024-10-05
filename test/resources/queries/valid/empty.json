@@ -1,0 +1,16 @@
+{
+	"title": "Empty data test",
+	"input": {
+		"WHERE": {
+			"IS": {
+				"sections_dept": "empty"
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": ["sections_dept", "sections_avg", "sections_id"],
+			"ORDER": "sections_avg"
+		}
+	},
+	"errorExpected": false,
+	"expected":[]
+}

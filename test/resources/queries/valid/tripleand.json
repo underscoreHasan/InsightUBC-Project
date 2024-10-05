@@ -1,0 +1,133 @@
+{
+	"title": "TRIPLE AND",
+	"input": {
+		"WHERE": {
+			"AND": [
+				{
+					"AND": [
+						{
+							"GT": {
+								"sections_avg": 95
+							}
+						},
+						{
+							"AND": [
+								{
+									"IS": {
+										"sections_dept": "mat*"
+									}
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"sections_dept",
+				"sections_id",
+				"sections_avg"
+			],
+			"ORDER": "sections_avg"
+		}
+	},
+	"errorExpected": false,
+	"expected": [
+		{
+			"sections_dept": "math",
+			"sections_id": "534",
+			"sections_avg": 95.56
+		},
+		{
+			"sections_dept": "math",
+			"sections_id": "534",
+			"sections_avg": 95.56
+		},
+		{
+			"sections_dept": "math",
+			"sections_id": "510",
+			"sections_avg": 95.67
+		},
+		{
+			"sections_dept": "math",
+			"sections_id": "510",
+			"sections_avg": 95.67
+		},
+		{
+			"sections_dept": "math",
+			"sections_id": "516",
+			"sections_avg": 96.25
+		},
+		{
+			"sections_dept": "math",
+			"sections_id": "516",
+			"sections_avg": 96.25
+		},
+		{
+			"sections_dept": "math",
+			"sections_id": "589",
+			"sections_avg": 96.33
+		},
+		{
+			"sections_dept": "math",
+			"sections_id": "502",
+			"sections_avg": 96.44
+		},
+		{
+			"sections_dept": "math",
+			"sections_id": "502",
+			"sections_avg": 96.44
+		},
+		{
+			"sections_dept": "math",
+			"sections_id": "545",
+			"sections_avg": 96.83
+		},
+		{
+			"sections_dept": "math",
+			"sections_id": "545",
+			"sections_avg": 96.83
+		},
+		{
+			"sections_dept": "math",
+			"sections_id": "541",
+			"sections_avg": 97.09
+		},
+		{
+			"sections_dept": "math",
+			"sections_id": "541",
+			"sections_avg": 97.09
+		},
+		{
+			"sections_dept": "math",
+			"sections_id": "525",
+			"sections_avg": 97.25
+		},
+		{
+			"sections_dept": "math",
+			"sections_id": "525",
+			"sections_avg": 97.25
+		},
+		{
+			"sections_dept": "math",
+			"sections_id": "532",
+			"sections_avg": 97.48
+		},
+		{
+			"sections_dept": "math",
+			"sections_id": "532",
+			"sections_avg": 97.48
+		},
+		{
+			"sections_dept": "math",
+			"sections_id": "527",
+			"sections_avg": 99.78
+		},
+		{
+			"sections_dept": "math",
+			"sections_id": "527",
+			"sections_avg": 99.78
+		}
+	]
+}

@@ -1,0 +1,16 @@
+{
+	"title": "invalid type string",
+	"input": {
+		"WHERE": {
+			"IS": {
+				"sections_dept": 25
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": ["sections_dept", "sections_avg", "sections_id"],
+			"ORDER": "sections_avg"
+		}
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}

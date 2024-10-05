@@ -1,0 +1,20 @@
+{
+	"title": "invalidNumberType",
+	"input": {
+		"WHERE": {
+			"EQ": {
+				"sections_year": "overall"
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"sections_avg",
+				"sections_dept",
+				"sections_year"
+			],
+			"ORDER": "sections_dept"
+		}
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}

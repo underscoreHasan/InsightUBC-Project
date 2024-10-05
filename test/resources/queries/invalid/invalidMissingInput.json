@@ -1,0 +1,6 @@
+{
+	"title": "invalid test",
+	"input": {},
+	"errorExpected": true,
+	"expected": "InsightError"
+}
