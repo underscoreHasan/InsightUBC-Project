@@ -67,7 +67,7 @@ export default class InsightFacade implements IInsightFacade {
 											section.Audit
 										);
 									}
-									return null; // Return null for invalid sections
+									return null; // Return null for invalid section
 								})
 								.filter((section: any) => section !== null); // Filter out nulls
 						}
