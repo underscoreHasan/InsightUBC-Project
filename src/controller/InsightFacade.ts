@@ -1,7 +1,18 @@
-import { IInsightFacade, InsightDataset, InsightDatasetKind, InsightError, InsightResult } from "./IInsightFacade";
+import {
+	IInsightFacade,
+	InsightDataset,
+	InsightDatasetKind,
+	InsightError,
+	InsightResult,
+	NotFoundError,
+} from "./IInsightFacade";
 import JSZip from "jszip";
 import Dataset from "./Dataset";
 import Section from "./Section";
+import fs from "fs-extra";
+import path from "path";
+
+const DATA_DIR = path.join(__dirname, "data");
 
 export default class InsightFacade implements IInsightFacade {
 	private datasetIDs: string[] = [];
@@ -26,7 +37,13 @@ export default class InsightFacade implements IInsightFacade {
 		}
 
 		// Add dataset and valid sections
-		this.addDatasetToMemory(id, validSections);
+		const currentDataset = this.addDatasetToMemory(id, validSections);
+		try {
+			await this.saveDatasetToDisk(currentDataset, id);
+		} catch {
+			// Log the error and re-throw to inform the caller
+			throw new InsightError("Failed to save dataset to disk.");
+		}
 		return this.datasetIDs;
 	}
 
@@ -123,18 +140,60 @@ export default class InsightFacade implements IInsightFacade {
 	}
 
 	// Add dataset to memory
-	private addDatasetToMemory(id: string, sections: Section[]): void {
+	private addDatasetToMemory(id: string, sections: Section[]): Dataset {
 		const currentDataset = new Dataset(id);
 		for (const section of sections) {
 			currentDataset.addSection(section);
 		}
 		this.datasetIDs.push(id);
 		this.datasets.push(currentDataset);
+		return currentDataset;
 	}
 
-	// Placeholder for other methods
+	private async saveDatasetToDisk(dataset: Dataset, id: string): Promise<void> {
+		const dirPath = DATA_DIR; // Use the directory path defined earlier
+		const filePath = path.join(dirPath, `${id}.json`);
+
+		// Check if the data directory exists; if not, create it
+		await fs.ensureDir(dirPath); // This will create the directory if it does not exist
+		const dataToSave = {
+			datasetID: dataset.getDatasetID(),
+			sections: dataset.getSections().map((section) => ({
+				uuid: section.getUuid(),
+				id: section.getId(),
+				title: section.getTitle(),
+				instructor: section.getInstructor(),
+				dept: section.getDept(),
+				year: section.getYear(),
+				avg: section.getAvg(),
+				pass: section.getPass(),
+				fail: section.getFail(),
+				audit: section.getAudit(),
+			})), // Ensure only serializable properties are included
+		};
+		await fs.writeJson(filePath, dataToSave);
+	}
+
 	public async removeDataset(id: string): Promise<string> {
-		throw new Error(`InsightFacadeImpl::removeDataset() is unimplemented! - id=${id};`);
+		const regex = new RegExp("^[^_]+$");
+		if (!(regex.test(id) && id.trim().length !== 0)) {
+			throw new InsightError("Invalid ID provided for removal");
+		}
+
+		const index = this.datasetIDs.indexOf(id);
+		if (index === -1) {
+			throw new NotFoundError("Dataset not found!");
+		}
+
+		// Remove from memory
+		this.datasetIDs.splice(index, 1);
+		this.datasets.splice(index, 1);
+
+		// Remove from disk
+		// const filePath = path.join(DATA_DIR, `${id}.json`);
+		// await fs.remove(filePath);
+
+		return id;
 	}
 
 	public async performQuery(query: unknown): Promise<InsightResult[]> {
@@ -142,6 +201,10 @@ export default class InsightFacade implements IInsightFacade {
 	}
 
 	public async listDatasets(): Promise<InsightDataset[]> {
-		throw new Error(`InsightFacadeImpl::listDatasets is unimplemented!`);
+		return this.datasets.map((dataset) => ({
+			id: dataset.getDatasetID(),
+			kind: InsightDatasetKind.Sections,
+			numRows: dataset.getSections().length,
+		}));
 	}
 }
