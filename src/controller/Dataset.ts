@@ -8,19 +8,19 @@ export default class Dataset {
 		this.datasetID = datasetID;
 	}
 
-	public setDatasetID(datasetID: string) {
+	public setDatasetID(datasetID: string): void {
 		this.datasetID = datasetID;
 	}
 
-	public addSection(section: Section) {
+	public addSection(section: Section): void {
 		this.sections.push(section);
 	}
 
-	public getDatasetID() {
+	public getDatasetID(): string {
 		return this.datasetID;
 	}
 
-	public getSections() {
+	public getSections(): Section[] {
 		return this.sections;
 	}
 }
