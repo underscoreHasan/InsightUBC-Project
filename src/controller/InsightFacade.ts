@@ -9,6 +9,7 @@ import {
 import JSZip from "jszip";
 import Dataset from "./Dataset";
 import Section from "./Section";
+import { ASTTree, ValidFields } from "./ASTTree";
 import fs from "fs-extra";
 import path from "path";
 
@@ -196,8 +197,73 @@ export default class InsightFacade implements IInsightFacade {
 		return id;
 	}
 
-	public async performQuery(query: unknown): Promise<InsightResult[]> {
+	public async performQuery(query: any): Promise<InsightResult[]> {
+		// validate columns and options
+		const curDatasetID: string = this.validateColumnsAndOptions(query);
+		const datasetIDs: string[] = [];
+		(await this.listDatasets()).forEach((dataset) => {
+			datasetIDs.push(dataset.id);
+		});
+		if (!datasetIDs.includes(curDatasetID)) {
+			throw new InsightError("Dataset not in added lists");
+		}
+
+		//create AST tree
+		const queryParams = query.WHERE;
+		if (queryParams === undefined) {
+			throw new InsightError("Must include WHERE clause");
+		}
+		const createdASTTree = new ASTTree(curDatasetID, queryParams);
+		//apply search on section
+
+		//return results based on columns and options
 		throw new Error(`InsightFacadeImpl::performQuery() is unimplemented! - query=${query};`);
+	}
+
+	// this function takes in the query and checks the options, columns and order section
+	// params: queryOptions: any because it can either be empty or a json file
+	// returns the latest dataset referenced,
+
+	private validateColumnsAndOptions(queryOptions: any): string {
+		//check if empty
+		if (queryOptions === undefined || queryOptions === null) {
+			throw new InsightError("Query is empty!");
+		}
+
+		if (queryOptions.OPTIONS === undefined) {
+			throw new InsightError("Options is empty!");
+		}
+		//vaidate options
+		const options = queryOptions.OPTIONS;
+		if (options.COLUMNS.length === 0) {
+			throw new InsightError("Columns is empty!");
+		}
+
+		//iterate through column and validate
+		const columns = options.COLUMNS;
+		let prevDatasetID = columns[0].split("_");
+
+		columns.forEach((field: any) => {
+			const splitField = field.split("_");
+			const curDatasetID = splitField[0];
+			const curField = splitField[1];
+			if (!curDatasetID === prevDatasetID || !ValidFields.has(curField)) {
+				throw new InsightError("Error with columns");
+			}
+			prevDatasetID = curDatasetID;
+		});
+
+		//validate order
+		const order = options.ORDER;
+		if (order !== undefined) {
+			if (!columns.includes(order)) {
+				throw new InsightError("order has to be part of columns");
+			}
+			if (order.substring(0, order.indexOf("_")) !== prevDatasetID) {
+				throw new InsightError("order is referencing an invalid dataset");
+			}
+		}
+		return prevDatasetID;
 	}
 
 	public async listDatasets(): Promise<InsightDataset[]> {

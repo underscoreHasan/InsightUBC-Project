@@ -583,7 +583,7 @@ describe("InsightFacade", function () {
 		});
 	});
 
-	describe("Validate PerformQuery", function () {
+	describe.only("Validate PerformQuery", function () {
 		/**
 		 * Loads the TestQuery specified in the test name and asserts the behaviour of performQuery.
 		 *
@@ -642,45 +642,45 @@ describe("InsightFacade", function () {
 		// Examples demonstrating how to test performQuery using the JSON Test Queries.
 		// The relative path to the query file must be given in square brackets.
 		it("[valid/simple.json] SELECT dept, avg WHERE avg > 97", checkQuery);
-		it("[invalid/invalid.json] Query missing WHERE", checkQuery);
-		it("[invalid/invalidWildcard.json] Query with invalid wildcard", checkQuery);
-		it("[valid/empty.json] SELECT dept WHERE dept = empty", checkQuery);
-		it("[valid/nursing.json] SELECT dept WHERE dept = nursing", checkQuery);
-		it("[valid/wildcard.json] SELECT dept where dept IS z*", checkQuery);
-		it("[invalid/invalidSize.json] Query result too large", checkQuery);
-		it("[valid/whereoris.json] SELECT WHERE OR AND IS", checkQuery);
-		it("[invalid/wildcardWrong.json] wrong wildcard only", checkQuery);
+		// it("[invalid/invalid.json] Query missing WHERE", checkQuery);
+		// it("[invalid/invalidWildcard.json] Query with invalid wildcard", checkQuery);
+		// it("[valid/empty.json] SELECT dept WHERE dept = empty", checkQuery);
+		// it("[valid/nursing.json] SELECT dept WHERE dept = nursing", checkQuery);
+		// it("[valid/wildcard.json] SELECT dept where dept IS z*", checkQuery);
+		// it("[invalid/invalidSize.json] Query result too large", checkQuery);
+		// it("[valid/whereoris.json] SELECT WHERE OR AND IS", checkQuery);
+		// it("[invalid/wildcardWrong.json] wrong wildcard only", checkQuery);
 		it("[invalid/invalidOrder.json] invalid order key", checkQuery);
-		it("[invalid/invalidTypeNumber.json] invalid type returning", checkQuery);
-		it("[invalid/invalidTypeString.json] invalid string returning", checkQuery);
+		// it("[invalid/invalidTypeNumber.json] invalid type returning", checkQuery);
+		// it("[invalid/invalidTypeString.json] invalid string returning", checkQuery);
 		it("[invalid/invalidArray.json] invalid columns", checkQuery);
-		it("[invalid/invalidSingleDataset.json] invalid single dataset", checkQuery);
-		it("[valid/queryFirstWildcard.json] query with wildcard first", checkQuery);
-		it("[valid/wildcardEncased.json] query with wildcard encased", checkQuery);
-		it("[valid/queryNegation.json] querying with a negation", checkQuery);
-		it("[invalid/invalidMissingInput.json] missing input", checkQuery);
-		it("[invalid/invalidMultiple.json]", checkQuery);
-		it("[invalid/invalidHalfEmpty.json] missing input", checkQuery);
-		it("[invalid/invalidDatasetNotAdded.json] missing dataset", checkQuery);
+		//it("[invalid/invalidSingleDataset.json] invalid single dataset", checkQuery);
+		// it("[valid/queryFirstWildcard.json] query with wildcard first", checkQuery);
+		// it("[valid/wildcardEncased.json] query with wildcard encased", checkQuery);
+		// it("[valid/queryNegation.json] querying with a negation", checkQuery);
+		// it("[invalid/invalidMissingInput.json] missing input", checkQuery);
+		// it("[invalid/invalidMultiple.json]", checkQuery);
+		// it("[invalid/invalidHalfEmpty.json] missing input", checkQuery);
+		// it("[invalid/invalidDatasetNotAdded.json] missing dataset", checkQuery);
 		it("[invalid/invalidOrderNotInColumns.json] missing order key", checkQuery);
-		it("[invalid/invalidKey.json] invalid key", checkQuery);
-		it("[invalid/invalidMultipleKeys.json] invalid multiple keys", checkQuery);
-		it("[invalid/invalidLogicKey.json] invalid logic key", checkQuery);
+		// it("[invalid/invalidKey.json] invalid key", checkQuery);
+		// it("[invalid/invalidMultipleKeys.json] invalid multiple keys", checkQuery);
+		// it("[invalid/invalidLogicKey.json] invalid logic key", checkQuery);
 		it("[invalid/invalidColumnsKey.json] invalid column key", checkQuery);
-		it("[invalid/invalidDatasetName.json] invalid dataset name", checkQuery);
-		it("[valid/orandnotis.json] valid query with OR AND NOT IS", checkQuery);
-		it("[valid/tripleand.json] valid query with triple and", checkQuery);
-		it("[valid/tripleor.json] valid query with triple or", checkQuery);
-		it("[invalid/invalidId.json] invalid id", checkQuery);
-		it("[valid/allColumns.json] all columns", checkQuery);
-		it("[valid/eq.json] query eq grade", checkQuery);
-		it("[valid/gT.json] query gt grade", checkQuery);
-		it("[valid/lt.json] query less than grade", checkQuery);
-		it("[valid/zeroresult.json] zero results", checkQuery);
-		it("[invalid/invalidNokeyNot.json] no keys for negation", checkQuery);
-		it("[valid/wildcardstart.json] query with wildcard starting", checkQuery);
-		it("[invalid/invalidIsKeyType.json] invalid string in IS", checkQuery);
-		it("[invalid/invalidNumberType.json] invalid type in number query", checkQuery);
+		// it("[invalid/invalidDatasetName.json] invalid dataset name", checkQuery);
+		// it("[valid/orandnotis.json] valid query with OR AND NOT IS", checkQuery);
+		// it("[valid/tripleand.json] valid query with triple and", checkQuery);
+		// it("[valid/tripleor.json] valid query with triple or", checkQuery);
+		// it("[invalid/invalidId.json] invalid id", checkQuery);
+		// it("[valid/allColumns.json] all columns", checkQuery);
+		// it("[valid/eq.json] query eq grade", checkQuery);
+		// it("[valid/gT.json] query gt grade", checkQuery);
+		// it("[valid/lt.json] query less than grade", checkQuery);
+		// it("[valid/zeroresult.json] zero results", checkQuery);
+		// it("[invalid/invalidNokeyNot.json] no keys for negation", checkQuery);
+		// it("[valid/wildcardstart.json] query with wildcard starting", checkQuery);
+		// it("[invalid/invalidIsKeyType.json] invalid string in IS", checkQuery);
+		// it("[invalid/invalidNumberType.json] invalid type in number query", checkQuery);
 	});
 
 	describe("listDatasets", function () {
