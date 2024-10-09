@@ -5,10 +5,12 @@ import {
 	InsightError,
 	InsightResult,
 	NotFoundError,
+	ResultTooLargeError,
 } from "./IInsightFacade";
 import JSZip from "jszip";
 import Dataset from "./Dataset";
 import Section from "./Section";
+import { ASTTree, ValidFields } from "./ASTTree";
 import fs from "fs-extra";
 import path from "path";
 
@@ -196,8 +198,140 @@ export default class InsightFacade implements IInsightFacade {
 		return id;
 	}
 
-	public async performQuery(query: unknown): Promise<InsightResult[]> {
-		throw new Error(`InsightFacadeImpl::performQuery() is unimplemented! - query=${query};`);
+	public async performQuery(query: any): Promise<InsightResult[]> {
+		this.validateQueryWhere(query.WHERE);
+		// validate columns and options
+		const curDatasetID: string = this.validateColumnsAndOptions(query);
+		const datasetIDs: string[] = [];
+		(await this.listDatasets()).forEach((dataset) => {
+			datasetIDs.push(dataset.id);
+		});
+		if (!datasetIDs.includes(curDatasetID)) {
+			throw new InsightError("Dataset not in added lists");
+		}
+
+		//create AST tree
+		const queryParams = query.WHERE;
+
+		const createdASTTree = new ASTTree(queryParams, curDatasetID);
+		const sections = this.getSectionsFromDataset(curDatasetID);
+		//apply search on section
+		const filteredResults = sections.filter((section: Section) => {
+			return createdASTTree.evaluate(section);
+		});
+
+		//return results based on columns and options
+		const columnFiltered = filteredResults.map((section: any) => {
+			const result: any = [];
+			const columns = this.extractFilterColumns(query.OPTIONS.COLUMNS);
+			columns.forEach((column) => {
+				result[column] = section[column];
+			});
+			return result;
+		});
+		const sortedResult = this.sortResults(columnFiltered, query.OPTIONS.ORDER.split("_")[1]);
+		const result = this.constructFinalResult(sortedResult, curDatasetID);
+		const maxNum = 5000;
+		if (result.length >= maxNum) {
+			throw new ResultTooLargeError("Too many results");
+		}
+		return result;
+	}
+
+	//this function creates the results into the insightresult type
+	private constructFinalResult(sortedResult: any[], curDatasetID: string): any {
+		const result: any[] = [];
+
+		sortedResult.forEach((entry) => {
+			const curEntry = Object.entries(entry);
+			for (const subEntry of curEntry) {
+				subEntry[0] = curDatasetID + "_" + subEntry[0];
+			}
+			result.push(Object.fromEntries(curEntry));
+		});
+		return result;
+	}
+
+	// this function sorts based on given field
+	private sortResults(array: any[], field: string): any[] {
+		const result = array.sort((a: any, b: any) => {
+			if (a[field] < b[field]) {
+				return -1;
+			}
+			if (a[field] > b[field]) {
+				return 1;
+			}
+			return 0;
+		});
+		return result;
+	}
+
+	// this function takes the OPTIONS.COLUMNS part and strips all the dataset id's from the front
+	private extractFilterColumns(columns: any): string[] {
+		const result: string[] = [];
+		columns.forEach((column: string) => {
+			result.push(column.split("_")[1]);
+		});
+		return result;
+	}
+
+	// this function gets the data from disk and takes only the sections part
+	private getSectionsFromDataset(dataSetID: string): Section[] {
+		const dataset = require(`./data/${dataSetID}`);
+		return dataset.sections;
+	}
+
+	private validateQueryWhere(queryParams: any): void {
+		if (queryParams === undefined || queryParams === null) {
+			throw new InsightError("Must include WHERE clause");
+		}
+		if (Object.keys(queryParams).length > 1) {
+			throw new InsightError("Multiple keys error");
+		}
+	}
+	// this function takes in the query and checks the options, columns and order section
+	// params: queryOptions: any because it can either be empty or a json file
+	// returns the latest dataset referenced, or InsightError if breaks spec
+	private validateColumnsAndOptions(queryOptions: any): string {
+		//check if empty
+		if (queryOptions === undefined || queryOptions === null) {
+			throw new InsightError("Query is empty!");
+		}
+
+		if (queryOptions.OPTIONS === undefined) {
+			throw new InsightError("Options is empty!");
+		}
+		//vaidate options
+		const options = queryOptions.OPTIONS;
+		if (options.COLUMNS.length === 0) {
+			throw new InsightError("Columns is empty!");
+		}
+
+		//iterate through column and validate
+		const columns = options.COLUMNS;
+		let prevDatasetID = columns[0].split("_");
+
+		columns.forEach((field: any) => {
+			const splitField = field.split("_");
+			const curDatasetID = splitField[0];
+			const curField = splitField[1];
+			if (!curDatasetID === prevDatasetID || !ValidFields.has(curField)) {
+				throw new InsightError("Error with columns");
+			}
+			prevDatasetID = curDatasetID;
+		});
+
+		//validate order
+		const order = options.ORDER;
+		if (order !== undefined) {
+			if (!columns.includes(order)) {
+				throw new InsightError("order has to be part of columns");
+			}
+			if (order.substring(0, order.indexOf("_")) !== prevDatasetID) {
+				throw new InsightError("order is referencing an invalid dataset");
+			}
+		}
+		return prevDatasetID;
 	}
 
 	public async listDatasets(): Promise<InsightDataset[]> {
