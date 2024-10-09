@@ -125,13 +125,15 @@ export default class InsightFacade implements IInsightFacade {
 			"Fail" in section &&
 			"Audit" in section
 		) {
+			const overallSectionReplacementYear = 1900;
+			const year = section.Course === "overall" ? overallSectionReplacementYear : section.Year;
 			return new Section(
 				section.id,
 				section.Course,
 				section.Title,
 				section.Professor,
 				section.Subject,
-				section.Year,
+				year,
 				section.Avg,
 				section.Pass,
 				section.Fail,
@@ -161,19 +163,23 @@ export default class InsightFacade implements IInsightFacade {
 		const dataToSave = {
 			datasetID: dataset.getDatasetID(),
 			sections: dataset.getSections().map((section) => ({
-				uuid: section.getUuid(),
+				uuid: String(section.getUuid()),
 				id: section.getId(),
 				title: section.getTitle(),
 				instructor: section.getInstructor(),
 				dept: section.getDept(),
-				year: section.getYear(),
+				year: Number(section.getYear()),
 				avg: section.getAvg(),
 				pass: section.getPass(),
 				fail: section.getFail(),
 				audit: section.getAudit(),
 			})), // Ensure only serializable properties are included
 		};
-		await fs.writeJson(filePath, dataToSave);
+		try {
+			await fs.writeJson(filePath, dataToSave);
+		} catch {
+			throw new InsightError("writeJSON failed!");
+		}
 	}
 
 	public async removeDataset(id: string): Promise<string> {

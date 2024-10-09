@@ -583,7 +583,7 @@ describe("InsightFacade", function () {
 		});
 	});
 
-	describe.only("Validate PerformQuery", function () {
+	describe("Validate PerformQuery", function () {
 		/**
 		 * Loads the TestQuery specified in the test name and asserts the behaviour of performQuery.
 		 *
