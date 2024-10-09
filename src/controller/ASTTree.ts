@@ -28,13 +28,13 @@ interface LogicNode extends BaseNode {
 
 interface ComparisionNode extends BaseNode {
 	operator: ComparisionOperator;
-	key: string;
+	field: string;
 	value: string;
 }
 
 interface NegationNode extends BaseNode {
 	operator: "NOT";
-	children: ASTNode;
+	child: ASTNode;
 }
 
 type ASTNode = LogicNode | ComparisionNode | NegationNode;
@@ -58,33 +58,39 @@ export class ASTTree {
 			if (!Array.isArray(value) || value.length === 0) {
 				throw new InsightError("Must have children keys");
 			}
-			return {
+			const logicalNode: LogicNode = {
 				operator: key,
 				children: value.map((child: any) => this.buildASTTree(child, datasetID)),
-				evaluate: (data: any) => this.evaluateLogic(data, key, value, datasetID),
+				evaluate: (data: any) => this.evaluateLogic(data, key, logicalNode.children),
 			};
+			return logicalNode;
 		}
 
 		if (key === "NOT") {
-			return {
+			const negationNode: NegationNode = {
 				operator: key,
 				child: this.buildASTTree(value, datasetID),
 				evaluate: (data: any) => !this.evaluateNode(this.buildASTTree(value, datasetID), data),
 			};
+			return negationNode;
 		}
 		if (key === "IS" || key === "EQ" || key === "LT" || key === "GT") {
-			const treeField = Object.keys(value)[0];
-			if (treeField.substring(0, treeField.indexOf("_")) !== datasetID) {
-				throw new InsightError("multiple datasets found");
-			}
+			this.checkMultipleDatasets(Object.keys(value)[0], datasetID);
 			const [comparisionKey, comparisionValue] = Object.entries(value)[0];
 			this.checkForTypeEquality(comparisionKey, comparisionValue, key);
-			return {
-				operator: key,
+			const comparisionNode: ComparisionNode = {
+				operator: key as ComparisionOperator,
 				field: comparisionKey,
 				value: comparisionValue,
 				evaluate: (data: any) => this.evaluateComparision(data, key, value),
 			};
+			return comparisionNode;
+		}
+	}
+
+	private checkMultipleDatasets(treeField: any, datasetID: string): void {
+		if (treeField.substring(0, treeField.indexOf("_")) !== datasetID) {
+			throw new InsightError("multiple datasets found");
 		}
 	}
 
@@ -102,11 +108,11 @@ export class ASTTree {
 		return node.evaluate(data);
 	}
 
-	private evaluateLogic(data: any, operator: LogicOperator, children: any[], datasetID: string): boolean {
+	private evaluateLogic(data: any, operator: LogicOperator, children: ASTNode[]): boolean {
 		if (operator === "AND") {
-			return children.every((child) => this.evaluateNode(this.buildASTTree(child, datasetID), data));
+			return children.every((child: ASTNode) => this.evaluateNode(child, data));
 		} else if (operator === "OR") {
-			return children.some((child) => this.evaluateNode(this.buildASTTree(child, datasetID), data));
+			return children.some((child) => this.evaluateNode(child, data));
 		}
 		throw new InsightError("Invalid logic operator");
 	}
@@ -174,4 +180,36 @@ export class ASTTree {
 			return inputString === pattern;
 		}
 	}
+
+	// private printNode(node: any, depth = 0): void {
+	// 	// Indent to represent depth of the node in the tree
+	// 	const indent = " ".repeat(depth * 2);
+
+	// 	// Print the current node
+	// 	console.log(`${indent}Node Type: ${node.operator}`);
+
+	// 	// Depending on the type of node, print relevant details
+	// 	if ("children" in node && Array.isArray(node.children)) {
+	// 		// For LogicNode (AND, OR), print children nodes
+	// 		console.log(`${indent}Children:`);
+	// 		node.children.forEach((child: any) => this.printNode(child, depth + 1));
+	// 	} else if (node.operator === "NOT" && "child" in node) {
+	// 		// For NegationNode (NOT), print child node
+	// 		console.log(`${indent}Child:`);
+	// 		this.printNode(node.child, depth + 1);
+	// 	} else if ("field" in node) {
+	// 		// For ComparisionNode (IS, LT, GT, EQ), print the comparison details
+	// 		console.log(`${indent}Field: ${node.field}`);
+	// 		console.log(`${indent}Value: ${node.value}`);
+	// 		console.log(`${indent}function: ${node.evaluate}`);
+	// 	}
+	// }
+
+	// public printTree(): void {
+	// 	if (this.root) {
+	// 		this.printNode(this.root);
+	// 	} else {
+	// 		console.log("Tree is empty.");
+	// 	}
+	// }
 }

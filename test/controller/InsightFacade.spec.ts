@@ -680,6 +680,8 @@ describe("InsightFacade", function () {
 		it("[valid/wildcardstart.json] query with wildcard starting", checkQuery);
 		it("[invalid/invalidIsKeyType.json] invalid string in IS", checkQuery);
 		it("[invalid/invalidNumberType.json] invalid type in number query", checkQuery);
+		it("[valid/allColumns2.json] column check 2", checkQuery);
+		it("[valid/allColumns.json] column check", checkQuery);
 	});
 
 	describe("listDatasets", function () {

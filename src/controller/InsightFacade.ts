@@ -126,7 +126,8 @@ export default class InsightFacade implements IInsightFacade {
 			"Audit" in section
 		) {
 			const overallSectionReplacementYear = 1900;
-			const year = section.Course === "overall" ? overallSectionReplacementYear : section.Year;
+			const year = section.Section === "overall" ? overallSectionReplacementYear : section.Year;
+
 			return new Section(
 				section.id,
 				section.Course,
@@ -220,12 +221,12 @@ export default class InsightFacade implements IInsightFacade {
 		const queryParams = query.WHERE;
 
 		const createdASTTree = new ASTTree(queryParams, curDatasetID);
+		// createdASTTree.printTree();
 		const sections = this.getSectionsFromDataset(curDatasetID);
 		//apply search on section
-		const filteredResults = sections.filter((section: Section) => {
+		const filteredResults = sections.filter((section: any) => {
 			return createdASTTree.evaluate(section);
 		});
-
 		//return results based on columns and options
 		const columnFiltered = filteredResults.map((section: any) => {
 			const result: any = [];
@@ -249,18 +250,21 @@ export default class InsightFacade implements IInsightFacade {
 		const result: any[] = [];
 
 		sortedResult.forEach((entry) => {
-			const curEntry = Object.entries(entry);
-			for (const subEntry of curEntry) {
-				subEntry[0] = curDatasetID + "_" + subEntry[0];
+			const newEntry: Record<string, any> = {};
+
+			for (const [key, value] of Object.entries(entry)) {
+				newEntry[`${curDatasetID}_${key}`] = value;
 			}
-			result.push(Object.fromEntries(curEntry));
+
+			result.push(newEntry);
 		});
+
 		return result;
 	}
 
 	// this function sorts based on given field
 	private sortResults(array: any[], field: string): any[] {
-		const result = array.sort((a: any, b: any) => {
+		return [...array].sort((a: any, b: any) => {
 			if (a[field] < b[field]) {
 				return -1;
 			}
@@ -269,9 +273,7 @@ export default class InsightFacade implements IInsightFacade {
 			}
 			return 0;
 		});
-		return result;
 	}
-
 	// this function takes the OPTIONS.COLUMNS part and strips all the dataset id's from the front
 	private extractFilterColumns(columns: any): string[] {
 		const result: string[] = [];
