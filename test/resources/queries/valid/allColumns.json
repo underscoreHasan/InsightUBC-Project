@@ -1,5 +1,5 @@
 {
-	"title": "all columns",
+	"title": "No Title Specified",
 	"input": {
 		"WHERE": {
 			"IS": {
@@ -9,7 +9,6 @@
 		"OPTIONS": {
 			"COLUMNS": [
 				"sections_dept",
-				"sections_uuid",
 				"sections_id",
 				"sections_title",
 				"sections_instructor",
@@ -26,7 +25,6 @@
 	"expected": [
 		{
 			"sections_dept": "zool",
-			"sections_uuid": "84785",
 			"sections_id": "549",
 			"sections_title": "masters thesis",
 			"sections_instructor": "",
@@ -38,7 +36,6 @@
 		},
 		{
 			"sections_dept": "zool",
-			"sections_uuid": "84784",
 			"sections_id": "549",
 			"sections_title": "masters thesis",
 			"sections_instructor": "",
@@ -50,7 +47,6 @@
 		},
 		{
 			"sections_dept": "zool",
-			"sections_uuid": "84783",
 			"sections_id": "549",
 			"sections_title": "masters thesis",
 			"sections_instructor": "",
@@ -62,7 +58,6 @@
 		},
 		{
 			"sections_dept": "zool",
-			"sections_uuid": "79696",
 			"sections_id": "549",
 			"sections_title": "masters thesis",
 			"sections_instructor": "",
@@ -74,7 +69,6 @@
 		},
 		{
 			"sections_dept": "zool",
-			"sections_uuid": "79695",
 			"sections_id": "549",
 			"sections_title": "masters thesis",
 			"sections_instructor": "",
@@ -86,7 +80,6 @@
 		},
 		{
 			"sections_dept": "zool",
-			"sections_uuid": "79694",
 			"sections_id": "549",
 			"sections_title": "masters thesis",
 			"sections_instructor": "",
@@ -98,7 +91,6 @@
 		},
 		{
 			"sections_dept": "zool",
-			"sections_uuid": "79693",
 			"sections_id": "549",
 			"sections_title": "masters thesis",
 			"sections_instructor": "",
@@ -110,7 +102,6 @@
 		},
 		{
 			"sections_dept": "zool",
-			"sections_uuid": "75987",
 			"sections_id": "549",
 			"sections_title": "masters thesis",
 			"sections_instructor": "",
@@ -122,7 +113,6 @@
 		},
 		{
 			"sections_dept": "zool",
-			"sections_uuid": "75986",
 			"sections_id": "549",
 			"sections_title": "masters thesis",
 			"sections_instructor": "",
@@ -134,7 +124,6 @@
 		},
 		{
 			"sections_dept": "zool",
-			"sections_uuid": "75427",
 			"sections_id": "549",
 			"sections_title": "masters thesis",
 			"sections_instructor": "",
@@ -146,7 +135,6 @@
 		},
 		{
 			"sections_dept": "zool",
-			"sections_uuid": "75426",
 			"sections_id": "549",
 			"sections_title": "masters thesis",
 			"sections_instructor": "",
@@ -158,7 +146,6 @@
 		},
 		{
 			"sections_dept": "zool",
-			"sections_uuid": "42438",
 			"sections_id": "549",
 			"sections_title": "masters thesis",
 			"sections_instructor": "",
@@ -170,7 +157,6 @@
 		},
 		{
 			"sections_dept": "zool",
-			"sections_uuid": "42437",
 			"sections_id": "549",
 			"sections_title": "masters thesis",
 			"sections_instructor": "",
@@ -182,7 +168,6 @@
 		},
 		{
 			"sections_dept": "zool",
-			"sections_uuid": "42436",
 			"sections_id": "549",
 			"sections_title": "masters thesis",
 			"sections_instructor": "",
@@ -194,7 +179,6 @@
 		},
 		{
 			"sections_dept": "zool",
-			"sections_uuid": "22774",
 			"sections_id": "549",
 			"sections_title": "masters thesis",
 			"sections_instructor": "",
@@ -206,7 +190,6 @@
 		},
 		{
 			"sections_dept": "zool",
-			"sections_uuid": "22773",
 			"sections_id": "549",
 			"sections_title": "masters thesis",
 			"sections_instructor": "",
@@ -218,7 +201,6 @@
 		},
 		{
 			"sections_dept": "zool",
-			"sections_uuid": "14990",
 			"sections_id": "549",
 			"sections_title": "masters thesis",
 			"sections_instructor": "",
@@ -230,7 +212,6 @@
 		},
 		{
 			"sections_dept": "zool",
-			"sections_uuid": "14989",
 			"sections_id": "549",
 			"sections_title": "masters thesis",
 			"sections_instructor": "",
@@ -242,7 +223,6 @@
 		},
 		{
 			"sections_dept": "zool",
-			"sections_uuid": "14988",
 			"sections_id": "549",
 			"sections_title": "masters thesis",
 			"sections_instructor": "",
@@ -254,7 +234,6 @@
 		},
 		{
 			"sections_dept": "zool",
-			"sections_uuid": "14987",
 			"sections_id": "549",
 			"sections_title": "masters thesis",
 			"sections_instructor": "",
@@ -266,7 +245,6 @@
 		},
 		{
 			"sections_dept": "zool",
-			"sections_uuid": "6541",
 			"sections_id": "549",
 			"sections_title": "masters thesis",
 			"sections_instructor": "",
@@ -278,7 +256,6 @@
 		},
 		{
 			"sections_dept": "zool",
-			"sections_uuid": "6540",
 			"sections_id": "549",
 			"sections_title": "masters thesis",
 			"sections_instructor": "",
@@ -290,7 +267,6 @@
 		},
 		{
 			"sections_dept": "zool",
-			"sections_uuid": "84780",
 			"sections_id": "503",
 			"sections_title": "comp animal phyl",
 			"sections_instructor": "",
@@ -302,7 +278,6 @@
 		},
 		{
 			"sections_dept": "zool",
-			"sections_uuid": "84779",
 			"sections_id": "503",
 			"sections_title": "comp animal phyl",
 			"sections_instructor": "",
@@ -314,7 +289,6 @@
 		},
 		{
 			"sections_dept": "zool",
-			"sections_uuid": "42435",
 			"sections_id": "503",
 			"sections_title": "comp animal phyl",
 			"sections_instructor": "",
@@ -326,7 +300,6 @@
 		},
 		{
 			"sections_dept": "zool",
-			"sections_uuid": "42434",
 			"sections_id": "503",
 			"sections_title": "comp animal phyl",
 			"sections_instructor": "dalziel, anne c;porteus, cosima sandra",
@@ -338,7 +311,6 @@
 		},
 		{
 			"sections_dept": "zool",
-			"sections_uuid": "37714",
 			"sections_id": "503",
 			"sections_title": "comp animal phyl",
 			"sections_instructor": "",
@@ -350,7 +322,6 @@
 		},
 		{
 			"sections_dept": "zool",
-			"sections_uuid": "37713",
 			"sections_id": "503",
 			"sections_title": "comp animal phyl",
 			"sections_instructor": "milsom, william",
@@ -362,7 +333,6 @@
 		},
 		{
 			"sections_dept": "zool",
-			"sections_uuid": "31743",
 			"sections_id": "503",
 			"sections_title": "comp animal phyl",
 			"sections_instructor": "",
@@ -374,7 +344,6 @@
 		},
 		{
 			"sections_dept": "zool",
-			"sections_uuid": "31742",
 			"sections_id": "503",
 			"sections_title": "comp animal phyl",
 			"sections_instructor": "matthews, philip",
@@ -386,7 +355,6 @@
 		},
 		{
 			"sections_dept": "zool",
-			"sections_uuid": "14986",
 			"sections_id": "503",
 			"sections_title": "comp animal phyl",
 			"sections_instructor": "",
@@ -398,7 +366,6 @@
 		},
 		{
 			"sections_dept": "zool",
-			"sections_uuid": "14985",
 			"sections_id": "503",
 			"sections_title": "comp animal phyl",
 			"sections_instructor": "schulte, patricia",
@@ -410,7 +377,6 @@
 		},
 		{
 			"sections_dept": "zool",
-			"sections_uuid": "5076",
 			"sections_id": "503",
 			"sections_title": "comp animal phyl",
 			"sections_instructor": "",
@@ -422,7 +388,6 @@
 		},
 		{
 			"sections_dept": "zool",
-			"sections_uuid": "5075",
 			"sections_id": "503",
 			"sections_title": "comp animal phyl",
 			"sections_instructor": "matthews, philip",
@@ -434,7 +399,6 @@
 		},
 		{
 			"sections_dept": "zool",
-			"sections_uuid": "126",
 			"sections_id": "503",
 			"sections_title": "comp animal phyl",
 			"sections_instructor": "",
@@ -446,7 +410,6 @@
 		},
 		{
 			"sections_dept": "zool",
-			"sections_uuid": "125",
 			"sections_id": "503",
 			"sections_title": "comp animal phyl",
 			"sections_instructor": "savage, ken;shadwick, robert edward",
