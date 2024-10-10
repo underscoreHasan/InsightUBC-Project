@@ -53,7 +53,7 @@ describe("InsightFacade", function () {
 		notInCoursesFolder = await getContentFromArchives("NotInCoursesFolder.zip");
 		emptyJSON = await getContentFromArchives("emptyJSON.zip");
 		noSectionsAtAll = await getContentFromArchives("noSectionsAtAll.zip");
-		noValidSections = await getContentFromArchives("NoValidSections.zip");
+		// noValidSections = await getContentFromArchives("NoValidSections.zip");
 		notJSONFormat = await getContentFromArchives("notJSONFormat.zip");
 
 		// Just in case there is anything hanging around from a previous run of the test suite
