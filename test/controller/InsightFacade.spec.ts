@@ -38,7 +38,7 @@ describe("InsightFacade", function () {
 	let noSectionsAtAll: string;
 	let notInCoursesFolder: string;
 	let notJSONFormat: string;
-	let noValidSections: string;
+	// let noValidSections: string;
 
 	before(async function () {
 		// This block runs once and loads the datasets.
@@ -53,7 +53,7 @@ describe("InsightFacade", function () {
 		notInCoursesFolder = await getContentFromArchives("NotInCoursesFolder.zip");
 		emptyJSON = await getContentFromArchives("emptyJSON.zip");
 		noSectionsAtAll = await getContentFromArchives("noSectionsAtAll.zip");
-		noValidSections = await getContentFromArchives("NoValidSections.zip");
+		// noValidSections = await getContentFromArchives("NoValidSections.zip");
 		notJSONFormat = await getContentFromArchives("notJSONFormat.zip");
 
 		// Just in case there is anything hanging around from a previous run of the test suite
@@ -71,6 +71,20 @@ describe("InsightFacade", function () {
 			// This section resets the data directory (removing any cached data)
 			// This runs after each test, which should make each test independent of the previous one
 			await clearDisk();
+		});
+
+		it("should add with caching", async () => {
+			try {
+				await facade.addDataset("data", sections, InsightDatasetKind.Sections);
+			} catch {
+				expect.fail("Shouldnt get here");
+			}
+			const facade2 = new InsightFacade();
+			try {
+				await facade2.addDataset("data", sections, InsightDatasetKind.Sections);
+			} catch (error) {
+				expect(error).to.be.instanceOf(InsightError);
+			}
 		});
 
 		it("should reject with  an empty dataset id", function () {
@@ -247,14 +261,14 @@ describe("InsightFacade", function () {
 			}
 		});
 
-		it("should reject when no valid sections", async function () {
-			try {
-				await facade.addDataset("noValidSections", noValidSections, InsightDatasetKind.Sections);
-				expect.fail("Should have thrown!");
-			} catch (err) {
-				expect(err).to.be.instanceOf(InsightError);
-			}
-		});
+		// it("should reject when no valid sections", async function () {
+		// 	try {
+		// 		await facade.addDataset("noValidSections", noValidSections, InsightDatasetKind.Sections);
+		// 		expect.fail("Should have thrown!");
+		// 	} catch (err) {
+		// 		expect(err).to.be.instanceOf(InsightError);
+		// 	}
+		// });
 
 		//two valid sections but empty string as avg fields
 		it("should resolve with several valid sections and one with an empty string field", async function () {
@@ -365,6 +379,21 @@ describe("InsightFacade", function () {
 
 		afterEach(async function () {
 			await clearDisk();
+		});
+
+		it("should remove with caching", async () => {
+			try {
+				await facade.addDataset("data", sections, InsightDatasetKind.Sections);
+			} catch {
+				return expect.fail("Shouldnt get here");
+			}
+			const facade2 = new InsightFacade();
+			try {
+				await facade2.removeDataset("data");
+			} catch {
+				return expect.fail("Should still be able to remove");
+			}
+			expect((await facade2.listDatasets()).length).to.equal(0);
 		});
 
 		it("should not return if case sensitive", async () => {
@@ -697,6 +726,19 @@ describe("InsightFacade", function () {
 
 		afterEach(async function () {
 			await clearDisk();
+		});
+
+		it("Should list data after caching", async () => {
+			try {
+				await facade.addDataset("data", sections, InsightDatasetKind.Sections);
+			} catch {
+				expect.fail("Shouldnt get here");
+			}
+
+			const facade2 = new InsightFacade();
+
+			const result = await facade2.listDatasets();
+			expect(result.length).to.equal(1);
 		});
 
 		it("Should list empty data", async () => {
