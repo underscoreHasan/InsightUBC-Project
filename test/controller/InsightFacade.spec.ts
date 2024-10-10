@@ -73,6 +73,20 @@ describe("InsightFacade", function () {
 			await clearDisk();
 		});
 
+		it("should add with caching", async () => {
+			try {
+				await facade.addDataset("data", sections, InsightDatasetKind.Sections);
+			} catch {
+				expect.fail("Shouldnt get here");
+			}
+			const facade2 = new InsightFacade();
+			try {
+				await facade2.addDataset("data", sections, InsightDatasetKind.Sections);
+			} catch (error) {
+				expect(error).to.be.instanceOf(InsightError);
+			}
+		});
+
 		it("should reject with  an empty dataset id", function () {
 			const result = facade.addDataset("", sections, InsightDatasetKind.Sections);
 
@@ -365,6 +379,21 @@ describe("InsightFacade", function () {
 
 		afterEach(async function () {
 			await clearDisk();
+		});
+
+		it("should remove with caching", async () => {
+			try {
+				await facade.addDataset("data", sections, InsightDatasetKind.Sections);
+			} catch {
+				return expect.fail("Shouldnt get here");
+			}
+			const facade2 = new InsightFacade();
+			try {
+				await facade2.removeDataset("data");
+			} catch {
+				return expect.fail("Should still be able to remove");
+			}
+			expect((await facade2.listDatasets()).length).to.equal(0);
 		});
 
 		it("should not return if case sensitive", async () => {
@@ -697,6 +726,19 @@ describe("InsightFacade", function () {
 
 		afterEach(async function () {
 			await clearDisk();
+		});
+
+		it("Should list data after caching", async () => {
+			try {
+				await facade.addDataset("data", sections, InsightDatasetKind.Sections);
+			} catch {
+				expect.fail("Shouldnt get here");
+			}
+
+			const facade2 = new InsightFacade();
+
+			const result = await facade2.listDatasets();
+			expect(result.length).to.equal(1);
 		});
 
 		it("Should list empty data", async () => {

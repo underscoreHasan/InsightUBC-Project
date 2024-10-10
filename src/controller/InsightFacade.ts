@@ -13,14 +13,16 @@ import Section from "./Section";
 import { ASTTree, ValidFields } from "./ASTTree";
 import fs from "fs-extra";
 import path from "path";
+import { saveDatasetToDisk, loadDatasetFromDisk, addCacheToMemory } from "./DiskHandler";
 
-const DATA_DIR = path.join(__dirname, "data");
+export const DATA_DIR = path.join(__dirname, "../../data");
 
 export default class InsightFacade implements IInsightFacade {
 	private datasetIDs: string[] = [];
 	private datasets: Dataset[] = [];
 
 	public async addDataset(id: string, content: string, _kind: InsightDatasetKind): Promise<string[]> {
+		await addCacheToMemory(this.datasets, this.datasetIDs);
 		if (!this.validId(id)) {
 			throw new InsightError("id was invalid!");
 		}
@@ -41,7 +43,7 @@ export default class InsightFacade implements IInsightFacade {
 		// Add dataset and valid sections
 		const currentDataset = this.addDatasetToMemory(id, validSections);
 		try {
-			await this.saveDatasetToDisk(currentDataset, id);
+			await saveDatasetToDisk(currentDataset, id);
 		} catch {
 			// Log the error and re-throw to inform the caller
 			throw new InsightError("Failed to save dataset to disk.");
@@ -155,35 +157,8 @@ export default class InsightFacade implements IInsightFacade {
 		return currentDataset;
 	}
 
-	private async saveDatasetToDisk(dataset: Dataset, id: string): Promise<void> {
-		const dirPath = DATA_DIR; // Use the directory path defined earlier
-		const filePath = path.join(dirPath, `${id}.json`);
-
-		// Check if the data directory exists; if not, create it
-		await fs.ensureDir(dirPath); // This will create the directory if it does not exist
-		const dataToSave = {
-			datasetID: dataset.getDatasetID(),
-			sections: dataset.getSections().map((section) => ({
-				uuid: String(section.getUuid()),
-				id: section.getId(),
-				title: section.getTitle(),
-				instructor: section.getInstructor(),
-				dept: section.getDept(),
-				year: Number(section.getYear()),
-				avg: section.getAvg(),
-				pass: section.getPass(),
-				fail: section.getFail(),
-				audit: section.getAudit(),
-			})), // Ensure only serializable properties are included
-		};
-		try {
-			await fs.writeJson(filePath, dataToSave);
-		} catch {
-			throw new InsightError("writeJSON failed!");
-		}
-	}
-
 	public async removeDataset(id: string): Promise<string> {
+		await addCacheToMemory(this.datasets, this.datasetIDs);
 		const regex = new RegExp("^[^_]+$");
 		if (!(regex.test(id) && id.trim().length !== 0)) {
 			throw new InsightError("Invalid ID provided for removal");
@@ -199,8 +174,10 @@ export default class InsightFacade implements IInsightFacade {
 		this.datasets.splice(index, 1);
 
 		// Remove from disk
-		// const filePath = path.join(DATA_DIR, `${id}.json`);
-		// await fs.remove(filePath);
+		await fs.ensureDir(DATA_DIR);
+
+		const filePath = path.join(DATA_DIR, `${id}.json`);
+		await fs.remove(filePath);
 
 		return id;
 	}
@@ -209,11 +186,8 @@ export default class InsightFacade implements IInsightFacade {
 		this.validateQueryWhere(query.WHERE);
 		// validate columns and options
 		const curDatasetID: string = this.validateColumnsAndOptions(query);
-		const datasetIDs: string[] = [];
-		(await this.listDatasets()).forEach((dataset) => {
-			datasetIDs.push(dataset.id);
-		});
-		if (!datasetIDs.includes(curDatasetID)) {
+
+		if (!this.datasetIDs.includes(curDatasetID)) {
 			throw new InsightError("Dataset not in added lists");
 		}
 
@@ -222,7 +196,7 @@ export default class InsightFacade implements IInsightFacade {
 
 		const createdASTTree = new ASTTree(queryParams, curDatasetID);
 		// createdASTTree.printTree();
-		const sections = await this.loadDatasetFromDisk(curDatasetID);
+		const sections = await loadDatasetFromDisk(curDatasetID);
 		//apply search on section
 		const filteredResults = sections.filter((section: any) => {
 			return createdASTTree.evaluate(section);
@@ -284,38 +258,6 @@ export default class InsightFacade implements IInsightFacade {
 	}
 
 	// Helper method to load a dataset from disk and store it in memory
-	private async loadDatasetFromDisk(id: string): Promise<Section[]> {
-		const filePath = path.join(DATA_DIR, `${id}.json`);
-
-		try {
-			const dataset = await fs.readJson(filePath); // Read the dataset JSON file
-			const sections: Section[] = dataset.sections.map(
-				(section: any) =>
-					new Section(
-						section.uuid,
-						section.id,
-						section.title,
-						section.instructor,
-						section.dept,
-						section.year,
-						section.avg,
-						section.pass,
-						section.fail,
-						section.audit
-					)
-			);
-
-			// Add dataset to memory for future queries
-			const loadedDataset = new Dataset(id);
-			sections.forEach((section) => loadedDataset.addSection(section));
-			this.datasetIDs.push(id);
-			this.datasets.push(loadedDataset);
-
-			return sections;
-		} catch (error) {
-			throw new InsightError(`Error loading dataset from disk: ${error}`);
-		}
-	}
 
 	private validateQueryWhere(queryParams: any): void {
 		if (queryParams === undefined || queryParams === null) {
@@ -371,6 +313,7 @@ export default class InsightFacade implements IInsightFacade {
 	}
 
 	public async listDatasets(): Promise<InsightDataset[]> {
+		await addCacheToMemory(this.datasets, this.datasetIDs);
 		return this.datasets.map((dataset) => ({
 			id: dataset.getDatasetID(),
 			kind: InsightDatasetKind.Sections,
