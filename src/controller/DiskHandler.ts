@@ -17,43 +17,39 @@ async function getDiskIDs(): Promise<any> {
 }
 
 export async function addCacheToMemory(memory: Dataset[], memoryIds: string[]): Promise<void> {
-	try {
-		const ids = await getDiskIDs();
-		const datasetPromises = ids.map(async (datasetID: string) => {
-			const filePath = path.join(DATA_DIR, `${datasetID}.json`);
-			const newDataset = new Dataset(datasetID);
+	const ids = await getDiskIDs();
+	const datasetPromises = ids.map(async (datasetID: string) => {
+		const filePath = path.join(DATA_DIR, `${datasetID}.json`);
+		const newDataset = new Dataset(datasetID);
 
-			const dataset = await fs.readJson(filePath);
+		const dataset = await fs.readJson(filePath);
 
-			const sections: Section[] = dataset.sections.map(
-				(section: any) =>
-					new Section(
-						section.uuid,
-						section.id,
-						section.title,
-						section.instructor,
-						section.dept,
-						section.year,
-						section.avg,
-						section.pass,
-						section.fail,
-						section.audit
-					)
-			);
+		const sections: Section[] = dataset.sections.map(
+			(section: any) =>
+				new Section(
+					section.uuid,
+					section.id,
+					section.title,
+					section.instructor,
+					section.dept,
+					section.year,
+					section.avg,
+					section.pass,
+					section.fail,
+					section.audit
+				)
+		);
 
-			sections.forEach((section) => {
-				newDataset.addSection(section);
-			});
-			if (!memoryIds.includes(datasetID)) {
-				memoryIds.push(datasetID);
-				memory.push(newDataset);
-			}
+		sections.forEach((section) => {
+			newDataset.addSection(section);
 		});
+		if (!memoryIds.includes(datasetID)) {
+			memoryIds.push(datasetID);
+			memory.push(newDataset);
+		}
+	});
 
-		await Promise.all(datasetPromises);
-	} catch (error) {
-		console.log(error);
-	}
+	await Promise.all(datasetPromises);
 }
 
 export async function loadDatasetFromDisk(this: any, id: string): Promise<Section[]> {
