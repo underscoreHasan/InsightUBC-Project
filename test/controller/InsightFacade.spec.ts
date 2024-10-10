@@ -713,6 +713,7 @@ describe("InsightFacade", function () {
 		it("[valid/allColumns.json] column check", checkQuery);
 		it("[valid/testSort.json] testing sorting", checkQuery);
 		it("[valid/megaTest.json] mega test sort", checkQuery);
+		it("[valid/noOrder.json] no order", checkQuery);
 	});
 
 	describe("listDatasets", function () {

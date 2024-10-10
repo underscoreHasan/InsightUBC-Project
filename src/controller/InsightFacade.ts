@@ -210,13 +210,16 @@ export default class InsightFacade implements IInsightFacade {
 			});
 			return result;
 		});
-		const sortedResult = this.sortResults(columnFiltered, query.OPTIONS.ORDER.split("_")[1]);
+		let sortedResult = columnFiltered;
+		if (query.OPTIONS.ORDER) {
+			sortedResult = this.sortResults(columnFiltered, query.OPTIONS.ORDER.split("_")[1]);
+		}
 		const result = this.constructFinalResult(sortedResult, curDatasetID);
 		const maxNum = 5000;
 		if (result.length >= maxNum) {
 			throw new ResultTooLargeError("Too many results");
 		}
-		return result;
+		return result as InsightResult[];
 	}
 
 	//this function creates the results into the insightresult type
@@ -230,7 +233,7 @@ export default class InsightFacade implements IInsightFacade {
 				newEntry[`${curDatasetID}_${key}`] = value;
 			}
 
-			result.push(newEntry);
+			result.push(newEntry as InsightResult);
 		});
 
 		return result;
