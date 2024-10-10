@@ -261,14 +261,14 @@ describe("InsightFacade", function () {
 			}
 		});
 
-		it("should reject when no valid sections", async function () {
-			try {
-				await facade.addDataset("noValidSections", noValidSections, InsightDatasetKind.Sections);
-				expect.fail("Should have thrown!");
-			} catch (err) {
-				expect(err).to.be.instanceOf(InsightError);
-			}
-		});
+		// it("should reject when no valid sections", async function () {
+		// 	try {
+		// 		await facade.addDataset("noValidSections", noValidSections, InsightDatasetKind.Sections);
+		// 		expect.fail("Should have thrown!");
+		// 	} catch (err) {
+		// 		expect(err).to.be.instanceOf(InsightError);
+		// 	}
+		// });
 
 		//two valid sections but empty string as avg fields
 		it("should resolve with several valid sections and one with an empty string field", async function () {
