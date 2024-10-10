@@ -236,15 +236,26 @@ export default class InsightFacade implements IInsightFacade {
 		return result;
 	}
 
-	// this function sorts based on given field
-	private sortResults(array: any[], field: string): any[] {
+	private sortResults(array: any[], primaryField: string): any[] {
 		return [...array].sort((a: any, b: any) => {
-			if (a[field] < b[field]) {
+			if (a[primaryField] < b[primaryField]) {
 				return -1;
 			}
-			if (a[field] > b[field]) {
+			if (a[primaryField] > b[primaryField]) {
 				return 1;
 			}
+
+			const fields = Object.keys(a).filter((field) => field !== primaryField);
+
+			for (const field of fields) {
+				if (a[field] < b[field]) {
+					return -1;
+				}
+				if (a[field] > b[field]) {
+					return 1;
+				}
+			}
+
 			return 0;
 		});
 	}
