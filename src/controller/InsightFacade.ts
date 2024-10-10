@@ -222,7 +222,7 @@ export default class InsightFacade implements IInsightFacade {
 
 		const createdASTTree = new ASTTree(queryParams, curDatasetID);
 		// createdASTTree.printTree();
-		const sections = this.getSectionsFromDataset(curDatasetID);
+		const sections = await this.loadDatasetFromDisk(curDatasetID);
 		//apply search on section
 		const filteredResults = sections.filter((section: any) => {
 			return createdASTTree.evaluate(section);
@@ -283,10 +283,38 @@ export default class InsightFacade implements IInsightFacade {
 		return result;
 	}
 
-	// this function gets the data from disk and takes only the sections part
-	private getSectionsFromDataset(dataSetID: string): Section[] {
-		const dataset = require(`./data/${dataSetID}`);
-		return dataset.sections;
+	// Helper method to load a dataset from disk and store it in memory
+	private async loadDatasetFromDisk(id: string): Promise<Section[]> {
+		const filePath = path.join(DATA_DIR, `${id}.json`);
+
+		try {
+			const dataset = await fs.readJson(filePath); // Read the dataset JSON file
+			const sections: Section[] = dataset.sections.map(
+				(section: any) =>
+					new Section(
+						section.uuid,
+						section.id,
+						section.title,
+						section.instructor,
+						section.dept,
+						section.year,
+						section.avg,
+						section.pass,
+						section.fail,
+						section.audit
+					)
+			);
+
+			// Add dataset to memory for future queries
+			const loadedDataset = new Dataset(id);
+			sections.forEach((section) => loadedDataset.addSection(section));
+			this.datasetIDs.push(id);
+			this.datasets.push(loadedDataset);
+
+			return sections;
+		} catch (error) {
+			throw new InsightError(`Error loading dataset from disk: ${error}`);
+		}
 	}
 
 	private validateQueryWhere(queryParams: any): void {
