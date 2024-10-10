@@ -38,7 +38,7 @@ describe("InsightFacade", function () {
 	let noSectionsAtAll: string;
 	let notInCoursesFolder: string;
 	let notJSONFormat: string;
-	let noValidSections: string;
+	// let noValidSections: string;
 
 	before(async function () {
 		// This block runs once and loads the datasets.
