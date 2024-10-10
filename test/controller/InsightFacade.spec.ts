@@ -711,6 +711,8 @@ describe("InsightFacade", function () {
 		it("[invalid/invalidNumberType.json] invalid type in number query", checkQuery);
 		it("[valid/allColumns2.json] column check 2", checkQuery);
 		it("[valid/allColumns.json] column check", checkQuery);
+		it("[valid/testSort.json] testing sorting", checkQuery);
+		it("[valid/megaTest.json] mega test sort", checkQuery);
 	});
 
 	describe("listDatasets", function () {
