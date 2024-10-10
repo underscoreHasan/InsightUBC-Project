@@ -193,14 +193,19 @@ export default class InsightFacade implements IInsightFacade {
 
 		//create AST tree
 		const queryParams = query.WHERE;
-
-		const createdASTTree = new ASTTree(queryParams, curDatasetID);
-		// createdASTTree.printTree();
+		let filteredResults;
 		const sections = await loadDatasetFromDisk(curDatasetID);
-		//apply search on section
-		const filteredResults = sections.filter((section: any) => {
-			return createdASTTree.evaluate(section);
-		});
+
+		if (Object.entries(queryParams).length !== 0) {
+			const createdASTTree = new ASTTree(queryParams, curDatasetID);
+			// createdASTTree.printTree();
+			//apply search on section
+			filteredResults = sections.filter((section: any) => {
+				return createdASTTree.evaluate(section);
+			});
+		} else {
+			filteredResults = sections;
+		}
 		//return results based on columns and options
 		const columnFiltered = filteredResults.map((section: any) => {
 			const result: any = [];
@@ -215,10 +220,7 @@ export default class InsightFacade implements IInsightFacade {
 			sortedResult = this.sortResults(columnFiltered, query.OPTIONS.ORDER.split("_")[1]);
 		}
 		const result = this.constructFinalResult(sortedResult, curDatasetID);
-		const maxNum = 5000;
-		if (result.length >= maxNum) {
-			throw new ResultTooLargeError("Too many results");
-		}
+
 		return result as InsightResult[];
 	}
 
@@ -235,7 +237,11 @@ export default class InsightFacade implements IInsightFacade {
 
 			result.push(newEntry as InsightResult);
 		});
+		const maxNum = 5000;
 
+		if (result.length >= maxNum) {
+			throw new ResultTooLargeError("Too many results");
+		}
 		return result;
 	}
 
