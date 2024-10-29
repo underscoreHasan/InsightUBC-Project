@@ -38,7 +38,8 @@ describe("InsightFacade", function () {
 	let noSectionsAtAll: string;
 	let notInCoursesFolder: string;
 	let notJSONFormat: string;
-	// let noValidSections: string;
+	let noValidSections: string;
+	let someInvalidSectionsPair: string;
 
 	before(async function () {
 		// This block runs once and loads the datasets.
@@ -53,8 +54,9 @@ describe("InsightFacade", function () {
 		notInCoursesFolder = await getContentFromArchives("NotInCoursesFolder.zip");
 		emptyJSON = await getContentFromArchives("emptyJSON.zip");
 		noSectionsAtAll = await getContentFromArchives("noSectionsAtAll.zip");
-		// noValidSections = await getContentFromArchives("NoValidSections.zip");
+		noValidSections = await getContentFromArchives("NoValidSections.zip");
 		notJSONFormat = await getContentFromArchives("notJSONFormat.zip");
+		someInvalidSectionsPair = await getContentFromArchives("someInvalidSectionsPair.zip");
 
 		// Just in case there is anything hanging around from a previous run of the test suite
 		await clearDisk();
@@ -252,6 +254,15 @@ describe("InsightFacade", function () {
 			}
 		});
 
+		it("should reject when noValidSections", async function () {
+			try {
+				await facade.addDataset("noValidSections", noValidSections, InsightDatasetKind.Sections);
+				expect.fail("Should have thrown!");
+			} catch (err) {
+				expect(err).to.be.instanceOf(InsightError);
+			}
+		});
+
 		it("should reject when not in JSON Format", async function () {
 			try {
 				await facade.addDataset("notJSONFormat", notJSONFormat, InsightDatasetKind.Sections);
@@ -368,6 +379,22 @@ describe("InsightFacade", function () {
 				expect(result).to.deep.equals(["oneCourse", "threeCourses"]);
 			} catch {
 				expect.fail("Should not have thrown after 3 additions, 1 removal!");
+			}
+		});
+
+		it("should resolve with pair.zip and oneInvalidSectionPair.zip", async function () {
+			try {
+				const result = await facade.addDataset("sections", sections, InsightDatasetKind.Sections);
+				expect(result).to.deep.equals(["sections"]);
+			} catch {
+				expect.fail("Should not have thrown after 1 addition!");
+			}
+
+			try {
+				const result = await facade.addDataset("someInvalidSectionsPair", someInvalidSectionsPair, InsightDatasetKind.Sections);
+				expect(result).to.deep.equals(["sections", "someInvalidSectionsPair"]);
+			} catch {
+				expect.fail("Should not have thrown after 2 additions!");
 			}
 		});
 	});
