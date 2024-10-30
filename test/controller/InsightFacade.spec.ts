@@ -20,6 +20,7 @@ export interface ITestQuery {
 	input: unknown;
 	errorExpected: boolean;
 	expected: any;
+	order: boolean;
 }
 
 describe("InsightFacade", function () {
@@ -627,7 +628,7 @@ describe("InsightFacade", function () {
 				);
 			}
 			// Destructuring assignment to reduce property accesses
-			const { input, expected, errorExpected } = await loadTestQuery(this.test.title);
+			const { input, expected, errorExpected, order } = await loadTestQuery(this.test.title);
 			let result: InsightResult[] | undefined;
 			try {
 				result = await facade.performQuery(input);
@@ -645,7 +646,11 @@ describe("InsightFacade", function () {
 			if (errorExpected) {
 				expect.fail(`performQuery resolved when it should have rejected with ${expected}`);
 			}
-			expect(result).to.have.deep.members(expected);
+			if (order) {
+				expect(result).to.deep.equal(expected);
+			} else {
+				expect(result).to.have.deep.members(expected);
+			}
 		}
 
 		before(async function () {
@@ -714,6 +719,25 @@ describe("InsightFacade", function () {
 		it("[valid/testSort.json] testing sorting", checkQuery);
 		it("[valid/megaTest.json] mega test sort", checkQuery);
 		it("[valid/noOrder.json] no order", checkQuery);
+
+		// rooms
+
+		it("[invalid/emptykeys.json] no keys in keys array for order", checkQuery);
+		it("[invalid/invalidkeys.json] invalid keys in key array", checkQuery);
+		it("[invalid/invalidOrderDir.json] invalid directions in order", checkQuery);
+		it("[invalid/missingKeys.json] missing keys in order", checkQuery);
+		it("[invalid/morethanonedatasetcolumns.json] column has more than one dataset", checkQuery);
+		it("[invalid/invalidgroup.json] invalid group name", checkQuery);
+
+		it("[valid/rooms.json] default rooms test", checkQuery);
+		it("[valid/validnokeys.json] no keys in order", checkQuery);
+
+		// check ordering
+		it("[valid/validAvg.json] valid avg and check order", checkQuery);
+		it("[valid/validCount.json] valid count and check order", checkQuery);
+		it("[valid/validmax.json] valid max and check order", checkQuery);
+		it("[valid/validmin.json] valid min and check order", checkQuery);
+		it("[valid/validsum.json] valid sum and check order", checkQuery);
 	});
 
 	describe("listDatasets", function () {

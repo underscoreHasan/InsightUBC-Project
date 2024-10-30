@@ -14,7 +14,7 @@ import { ASTTree, ValidFields } from "./ASTTree";
 import fs from "fs-extra";
 import path from "path";
 import { saveDatasetToDisk, loadDatasetFromDisk, addCacheToMemory } from "./DiskHandler";
-
+import { validateRooms } from "./RoomManipulations";
 export const DATA_DIR = path.join(__dirname, "../../data");
 
 export default class InsightFacade implements IInsightFacade {
@@ -304,7 +304,14 @@ export default class InsightFacade implements IInsightFacade {
 		if (options.COLUMNS.length === 0) {
 			throw new InsightError("Columns is empty!");
 		}
+		if (queryOptions.TRANSFORMATIONS !== undefined) {
+			return validateRooms(options);
+		} else {
+			return this.validateNoRooms(options);
+		}
+	}
 
+	private validateNoRooms(options: any): string {
 		//iterate through column and validate
 		const columns = options.COLUMNS;
 		let prevDatasetID = columns[0].split("_");
