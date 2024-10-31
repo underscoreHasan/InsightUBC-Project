@@ -16,16 +16,17 @@ export const DATA_DIR = path.join(__dirname, "../../data");
 export default class InsightFacade implements IInsightFacade {
 	private datasetHandler = new DatasetHandler();
 
-	public async addDataset(id: string, content: string, _kind: InsightDatasetKind): Promise<string[]> {
+	public async addDataset(id: string, content: string, kind: InsightDatasetKind): Promise<string[]> {
 		await addCacheToMemory(this.datasetHandler.getDatasets(), this.datasetHandler.getDatasetIDs());
 		if (!this.datasetHandler.validId(id)) {
 			throw new InsightError("id was invalid!");
 		}
 		try {
 			const zip = await this.datasetHandler.loadZip(content);
-			await this.datasetHandler.processZip(id, zip);
+			await this.datasetHandler.processZip(id, zip, kind);
 			await saveDatasetToDisk(this.datasetHandler.getDataset(id), id);
 		} catch (err) {
+			//TODO: make sure the correct error TYPES are thrown
 			if (err instanceof Error) {
 			// Log the error and re-throw it to inform the caller
 			throw new InsightError("Failed to process dataset: " + err.message);
