@@ -25,7 +25,7 @@ export interface ITestQuery {
 describe("InsightFacade", function () {
 	let facade: IInsightFacade;
 
-	// Declare datasets used in tests. You should add more datasets like this!
+	// Declare sections datasets used in tests.
 	let sections: string;
 	let oneCourse: string;
 	let anotherOneCourse: string;
@@ -41,8 +41,14 @@ describe("InsightFacade", function () {
 	let noValidSections: string;
 	let someInvalidSectionsPair: string;
 
+	// Declare rooms datasets used in tests.
+	let campus: string;
+	let campusIndexNoCampusFolder: string;
+	let campusNoIndexNoCampusFolder: string;
+	let campusNoIndexCampusFolder: string;
+
 	before(async function () {
-		// This block runs once and loads the datasets.
+		// This block runs once and loads the sections datasets.
 		sections = await getContentFromArchives("pair.zip");
 		oneCourse = await getContentFromArchives("OneCourse.zip");
 		anotherOneCourse = await getContentFromArchives("AnotherOneCourse.zip");
@@ -57,6 +63,12 @@ describe("InsightFacade", function () {
 		noValidSections = await getContentFromArchives("NoValidSections.zip");
 		notJSONFormat = await getContentFromArchives("notJSONFormat.zip");
 		someInvalidSectionsPair = await getContentFromArchives("someInvalidSectionsPair.zip");
+
+		// This block runs once and loads the rooms datasets.
+		campus = await getContentFromArchives("/rooms/campus.zip");
+		campusIndexNoCampusFolder = await getContentFromArchives("/rooms/campusIndexNoCampusFolder.zip");
+		campusNoIndexNoCampusFolder = await getContentFromArchives("/rooms/campusNoIndexNoCampusFolder.zip");
+		campusNoIndexCampusFolder = await getContentFromArchives("/rooms/campusNoIndexCampusFolder.zip");
 
 		// Just in case there is anything hanging around from a previous run of the test suite
 		await clearDisk();
@@ -195,9 +207,18 @@ describe("InsightFacade", function () {
 			}
 		});
 
-		it("should reject with a non-zip file", async function () {
+		it("should reject with a non-zip file for sections", async function () {
 			try {
 				await facade.addDataset("notazip", notGonnaWork, InsightDatasetKind.Sections);
+				expect.fail("Should have thrown!");
+			} catch (err) {
+				expect(err).to.be.instanceOf(InsightError);
+			}
+		});
+
+		it("should reject with a non-zip file for rooms", async function () {
+			try {
+				await facade.addDataset("notazip", notGonnaWork, InsightDatasetKind.Rooms);
 				expect.fail("Should have thrown!");
 			} catch (err) {
 				expect(err).to.be.instanceOf(InsightError);
@@ -213,20 +234,6 @@ describe("InsightFacade", function () {
 			}
 		});
 
-		//A valid dataset:
-		//	Is a structured as a base64 string of a zip file.
-		// 	Contains at least one valid section.
-		// A valid course:
-		// 	Is a JSON formatted file.
-		// 	Contains one or more valid sections.
-		// 		Within a JSON formatted file, valid sections will be found within the "result" key.
-		// 	Is located within a folder called courses/ in the zip's root directory.
-		// A valid section:
-		// 	Contains every field which can be used by a query (see the "Valid Query Keys" section below).
-		// 	If a field you use in a section is present in the JSON but contains something counter-intuitive like empty string, it is still valid.
-
-		//datasets with
-		//only an invalid sections
 		it("should reject due to being only an invalid section", async function () {
 			try {
 				await facade.addDataset("invalidSection", invalidSection, InsightDatasetKind.Sections);
@@ -272,14 +279,14 @@ describe("InsightFacade", function () {
 			}
 		});
 
-		// it("should reject when no valid sections", async function () {
-		// 	try {
-		// 		await facade.addDataset("noValidSections", noValidSections, InsightDatasetKind.Sections);
-		// 		expect.fail("Should have thrown!");
-		// 	} catch (err) {
-		// 		expect(err).to.be.instanceOf(InsightError);
-		// 	}
-		// });
+		it("should reject when no valid sections", async function () {
+			try {
+				await facade.addDataset("noValidSections", noValidSections, InsightDatasetKind.Sections);
+				expect.fail("Should have thrown!");
+			} catch (err) {
+				expect(err).to.be.instanceOf(InsightError);
+			}
+		});
 
 		//two valid sections but empty string as avg fields
 		it("should resolve with several valid sections and one with an empty string field", async function () {
@@ -295,10 +302,7 @@ describe("InsightFacade", function () {
 			}
 		});
 
-		//several valid and several invalid sections?
-
 		//nothing in the /courses/ folder
-
 		it("should reject with valid id but invalid (empty) dataset", async function () {
 			try {
 				await facade.addDataset("emptyDataset", emptyDataset, InsightDatasetKind.Sections);
@@ -309,7 +313,6 @@ describe("InsightFacade", function () {
 		});
 
 		//tests for successful resolution:
-
 		it("should resolve with valid id and valid dataset", async function () {
 			try {
 				const result = await facade.addDataset("oneCourse", oneCourse, InsightDatasetKind.Sections);
@@ -395,6 +398,44 @@ describe("InsightFacade", function () {
 				expect(result).to.deep.equals(["sections", "someInvalidSectionsPair"]);
 			} catch {
 				expect.fail("Should not have thrown after 2 additions!");
+			}
+		});
+
+		//tests for Room
+		it("should resolve if campus.zip", async function () {
+			try {
+				const result = facade.addDataset("campus", campus, InsightDatasetKind.Rooms);
+				expect(result).to.deep.equals(["campus"]);
+			} catch {
+				expect.fail("Should not have thrown after addition!");
+			}
+		});
+
+
+		it("should reject if index.htm present and no campus folder missing", async function () {
+			try {
+				await facade.addDataset("campusIndexNoCampusFolder", campusIndexNoCampusFolder, InsightDatasetKind.Rooms);
+				expect.fail("Should have thrown!");
+			} catch (err) {
+				expect(err).to.be.instanceOf(InsightError);
+			}
+		});
+
+		it("should reject if no index.htm present and campus folder missing", async function () {
+			try {
+				await facade.addDataset("campusNoIndexCampusFolder", campusNoIndexCampusFolder, InsightDatasetKind.Rooms);
+				expect.fail("Should have thrown!");
+			} catch (err) {
+				expect(err).to.be.instanceOf(InsightError);
+			}
+		});
+
+		it("should reject if no index.htm present and no campus folder missing", async function () {
+			try {
+				await facade.addDataset("campusNoIndexNoCampusFolder", campusNoIndexNoCampusFolder, InsightDatasetKind.Rooms);
+				expect.fail("Should have thrown!");
+			} catch (err) {
+				expect(err).to.be.instanceOf(InsightError);
 			}
 		});
 	});
