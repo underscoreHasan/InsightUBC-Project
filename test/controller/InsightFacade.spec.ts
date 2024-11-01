@@ -3,12 +3,12 @@ import {
 	InsightDataset,
 	InsightDatasetKind,
 	InsightError,
-	// InsightResult,
+	InsightResult,
 	NotFoundError,
-	// ResultTooLargeError,
+	ResultTooLargeError,
 } from "../../src/controller/IInsightFacade";
 import InsightFacade from "../../src/controller/InsightFacade";
-import { clearDisk, getContentFromArchives } from "../TestUtil";
+import { clearDisk, getContentFromArchives, loadTestQuery } from "../TestUtil";
 
 import { expect, use } from "chai";
 import chaiAsPromised from "chai-as-promised";
@@ -615,179 +615,179 @@ describe("InsightFacade", function () {
 		});
 	});
 
-	// describe("Validate PerformQuery", function () {
-	// 	/**
-	// 	 * Loads the TestQuery specified in the test name and asserts the behaviour of performQuery.
-	// 	 *
-	// 	 * Note: the 'this' parameter is automatically set by Mocha and contains information about the test.
-	// 	 */
-	// 	async function checkQuery(this: Mocha.Context): Promise<void> {
-	// 		if (!this.test) {
-	// 			throw new Error(
-	// 				"Invalid call to checkQuery." +
-	// 					"Usage: 'checkQuery' must be passed as the second parameter of Mocha's it(..) function." +
-	// 					"Do not invoke the function directly."
-	// 			);
-	// 		}
-	// 		// Destructuring assignment to reduce property accesses
-	// 		const { input, expected, errorExpected, order } = await loadTestQuery(this.test.title);
-	// 		let result: InsightResult[] | undefined;
-	// 		try {
-	// 			result = await facade.performQuery(input);
-	// 		} catch (err) {
-	// 			if (!errorExpected) {
-	// 				return expect.fail(`performQuery threw unexpected error: ${err}`);
-	// 			}
-	// 			if (expected === "InsightError") {
-	// 				expect(err).to.be.instanceOf(InsightError);
-	// 			} else if (expected === "ResultTooLargeError") {
-	// 				expect(err).to.be.instanceOf(ResultTooLargeError);
-	// 			}
-	// 			return;
-	// 		}
-	// 		if (errorExpected) {
-	// 			expect.fail(`performQuery resolved when it should have rejected with ${expected}`);
-	// 		}
-	// 		if (order) {
-	// 			expect(result).to.deep.equal(expected);
-	// 		} else {
-	// 			expect(result).to.have.deep.members(expected);
-	// 		}
-	// 	}
-	// 	describe("Perform query tests for sections", () => {
-	// 		before(async function () {
-	// 			facade = new InsightFacade();
+	describe("Validate PerformQuery", function () {
+		/**
+		 * Loads the TestQuery specified in the test name and asserts the behaviour of performQuery.
+		 *
+		 * Note: the 'this' parameter is automatically set by Mocha and contains information about the test.
+		 */
+		async function checkQuery(this: Mocha.Context): Promise<void> {
+			if (!this.test) {
+				throw new Error(
+					"Invalid call to checkQuery." +
+						"Usage: 'checkQuery' must be passed as the second parameter of Mocha's it(..) function." +
+						"Do not invoke the function directly."
+				);
+			}
+			// Destructuring assignment to reduce property accesses
+			const { input, expected, errorExpected, order } = await loadTestQuery(this.test.title);
+			let result: InsightResult[] | undefined;
+			try {
+				result = await facade.performQuery(input);
+			} catch (err) {
+				if (!errorExpected) {
+					return expect.fail(`performQuery threw unexpected error: ${err}`);
+				}
+				if (expected === "InsightError") {
+					expect(err).to.be.instanceOf(InsightError);
+				} else if (expected === "ResultTooLargeError") {
+					expect(err).to.be.instanceOf(ResultTooLargeError);
+				}
+				return;
+			}
+			if (errorExpected) {
+				expect.fail(`performQuery resolved when it should have rejected with ${expected}`);
+			}
+			if (order) {
+				expect(result).to.deep.equal(expected);
+			} else {
+				expect(result).to.have.deep.members(expected);
+			}
+		}
+		describe("Perform query tests for sections", () => {
+			before(async function () {
+				facade = new InsightFacade();
 
-	// 			// Add the datasets to InsightFacade once.
-	// 			// Will *fail* if there is a problem reading ANY dataset.
-	// 			const loadDatasetPromises: Promise<string[]>[] = [
-	// 				facade.addDataset("sections", sections, InsightDatasetKind.Sections),
-	// 			];
+				// Add the datasets to InsightFacade once.
+				// Will *fail* if there is a problem reading ANY dataset.
+				const loadDatasetPromises: Promise<string[]>[] = [
+					facade.addDataset("sections", sections, InsightDatasetKind.Sections),
+				];
 
-	// 			try {
-	// 				await Promise.all(loadDatasetPromises);
-	// 			} catch (err) {
-	// 				throw new Error(`In PerformQuery Before hook, dataset(s) failed to be added. \n${err}`);
-	// 			}
-	// 		});
+				try {
+					await Promise.all(loadDatasetPromises);
+				} catch (err) {
+					throw new Error(`In PerformQuery Before hook, dataset(s) failed to be added. \n${err}`);
+				}
+			});
 
-	// 		after(async function () {
-	// 			await clearDisk();
-	// 		});
+			after(async function () {
+				await clearDisk();
+			});
 
-	// 		// Examples demonstrating how to test performQuery using the JSON Test Queries.
-	// 		// The relative path to the query file must be given in square brackets.
-	// 		it("[valid/simple.json] SELECT dept, avg WHERE avg > 97", checkQuery);
-	// 		it("[invalid/invalid.json] Query missing WHERE", checkQuery);
-	// 		it("[invalid/invalidWildcard.json] Query with invalid wildcard", checkQuery);
-	// 		it("[valid/empty.json] SELECT dept WHERE dept = empty", checkQuery);
-	// 		it("[valid/nursing.json] SELECT dept WHERE dept = nursing", checkQuery);
-	// 		it("[valid/wildcard.json] SELECT dept where dept IS z*", checkQuery);
-	// 		it("[invalid/invalidSize.json] Query result too large", checkQuery);
-	// 		it("[valid/whereoris.json] SELECT WHERE OR AND IS", checkQuery);
-	// 		it("[invalid/wildcardWrong.json] wrong wildcard only", checkQuery);
-	// 		it("[invalid/invalidOrder.json] invalid order key", checkQuery);
-	// 		it("[invalid/invalidTypeNumber.json] invalid type returning", checkQuery);
-	// 		it("[invalid/invalidTypeString.json] invalid string returning", checkQuery);
-	// 		it("[invalid/invalidArray.json] invalid columns", checkQuery);
-	// 		it("[invalid/invalidSingleDataset.json] invalid single dataset", checkQuery);
-	// 		it("[valid/queryFirstWildcard.json] query with wildcard first", checkQuery);
-	// 		it("[valid/wildcardEncased.json] query with wildcard encased", checkQuery);
-	// 		it("[valid/queryNegation.json] querying with a negation", checkQuery);
-	// 		it("[invalid/invalidMissingInput.json] missing input", checkQuery);
-	// 		it("[invalid/invalidMultiple.json]", checkQuery);
-	// 		it("[invalid/invalidHalfEmpty.json] missing input", checkQuery);
-	// 		it("[invalid/invalidDatasetNotAdded.json] missing dataset", checkQuery);
-	// 		it("[invalid/invalidOrderNotInColumns.json] missing order key", checkQuery);
-	// 		it("[invalid/invalidKey.json] invalid key", checkQuery);
-	// 		it("[invalid/invalidMultipleKeys.json] invalid multiple keys", checkQuery);
-	// 		it("[invalid/invalidLogicKey.json] invalid logic key", checkQuery);
-	// 		it("[invalid/invalidColumnsKey.json] invalid column key", checkQuery);
-	// 		it("[invalid/invalidDatasetName.json] invalid dataset name", checkQuery);
-	// 		it("[valid/orandnotis.json] valid query with OR AND NOT IS", checkQuery);
-	// 		it("[valid/tripleand.json] valid query with triple and", checkQuery);
-	// 		it("[valid/tripleor.json] valid query with triple or", checkQuery);
-	// 		it("[invalid/invalidId.json] invalid id", checkQuery);
-	// 		it("[valid/eq.json] query eq grade", checkQuery);
-	// 		it("[valid/gT.json] query gt grade", checkQuery);
-	// 		it("[valid/lt.json] query less than grade", checkQuery);
-	// 		it("[valid/zeroresult.json] zero results", checkQuery);
-	// 		it("[invalid/invalidNokeyNot.json] no keys for negation", checkQuery);
-	// 		it("[valid/wildcardstart.json] query with wildcard starting", checkQuery);
-	// 		it("[invalid/invalidIsKeyType.json] invalid string in IS", checkQuery);
-	// 		it("[invalid/invalidNumberType.json] invalid type in number query", checkQuery);
-	// 		it("[valid/allColumns2.json] column check 2", checkQuery);
-	// 		it("[valid/allColumns.json] column check", checkQuery);
-	// 		it("[valid/testSort.json] testing sorting", checkQuery);
-	// 		it("[valid/megaTest.json] mega test sort", checkQuery);
-	// 		it("[valid/noOrder.json] no order", checkQuery);
-	// 		describe("transformations in sections", () => {
-	// 			it("[invalid/invalidKeyInColumnMustBeInGroupOrApply.json] invalid missing key from colums", checkQuery);
-	// 			it("[invalid/invalidKeyInGroup.json] invalid key in group", checkQuery);
-	// 			it("[invalid/invalidDatasetInApplyField.json] invalid dataset in apply", checkQuery);
-	// 			it("[invalid/invalidKeyInApplyField.json] invalid key in apply field", checkQuery);
-	// 			it("[invalid/invalidKeyTypeForApply.json] invalid key type for apply", checkQuery);
-	// 			it("[invalid/invalidTransformationInvalidKeyInApply.json] invalid key type for apply", checkQuery);
-	// 			it("[invalid/invalidTransformationMissingApply.json] invalid key type for apply", checkQuery);
-	// 			it("[invalid/invalidTransformationMissingGroup.json] invalid key type for apply", checkQuery);
-	// 			it("[invalid/invalidTransformationMissingKeyInColumns.json] invalid key type for apply", checkQuery);
-	// 			it("[invalid/invalidEmptyGroupArray.json] invalid group array", checkQuery);
-	// 			it("[invalid/invalidTypeForApply.json] invalid type for apply", checkQuery);
-	// 			it("[valid/validSectionsTransformation.json] valid section transformations", checkQuery);
-	// 			it("[valid/validSectionsDoubleGroup.json] valid double group key transformation", checkQuery);
-	// 			it("[invalid/invalidSectionsDoubleApplyFieldType.json] invalid apply field type", checkQuery);
-	// 			it("[invalid/invalidDuplicateKeyInApply.json] invalid duplicate apply key", checkQuery);
-	// 			it("[valid/validMaxSections.json] valid max sections", checkQuery);
-	// 			it("[valid/validMinSections.json] valid min section", checkQuery);
-	// 		});
-	// 	});
-	// 	// describe("Perform query tests for rooms", () => {
-	// 	// 	before(async function () {
-	// 	// 		facade = new InsightFacade();
+			// Examples demonstrating how to test performQuery using the JSON Test Queries.
+			// The relative path to the query file must be given in square brackets.
+			it("[valid/simple.json] SELECT dept, avg WHERE avg > 97", checkQuery);
+			it("[invalid/invalid.json] Query missing WHERE", checkQuery);
+			it("[invalid/invalidWildcard.json] Query with invalid wildcard", checkQuery);
+			it("[valid/empty.json] SELECT dept WHERE dept = empty", checkQuery);
+			it("[valid/nursing.json] SELECT dept WHERE dept = nursing", checkQuery);
+			it("[valid/wildcard.json] SELECT dept where dept IS z*", checkQuery);
+			it("[invalid/invalidSize.json] Query result too large", checkQuery);
+			it("[valid/whereoris.json] SELECT WHERE OR AND IS", checkQuery);
+			it("[invalid/wildcardWrong.json] wrong wildcard only", checkQuery);
+			it("[invalid/invalidOrder.json] invalid order key", checkQuery);
+			it("[invalid/invalidTypeNumber.json] invalid type returning", checkQuery);
+			it("[invalid/invalidTypeString.json] invalid string returning", checkQuery);
+			it("[invalid/invalidArray.json] invalid columns", checkQuery);
+			it("[invalid/invalidSingleDataset.json] invalid single dataset", checkQuery);
+			it("[valid/queryFirstWildcard.json] query with wildcard first", checkQuery);
+			it("[valid/wildcardEncased.json] query with wildcard encased", checkQuery);
+			it("[valid/queryNegation.json] querying with a negation", checkQuery);
+			it("[invalid/invalidMissingInput.json] missing input", checkQuery);
+			it("[invalid/invalidMultiple.json]", checkQuery);
+			it("[invalid/invalidHalfEmpty.json] missing input", checkQuery);
+			it("[invalid/invalidDatasetNotAdded.json] missing dataset", checkQuery);
+			it("[invalid/invalidOrderNotInColumns.json] missing order key", checkQuery);
+			it("[invalid/invalidKey.json] invalid key", checkQuery);
+			it("[invalid/invalidMultipleKeys.json] invalid multiple keys", checkQuery);
+			it("[invalid/invalidLogicKey.json] invalid logic key", checkQuery);
+			it("[invalid/invalidColumnsKey.json] invalid column key", checkQuery);
+			it("[invalid/invalidDatasetName.json] invalid dataset name", checkQuery);
+			it("[valid/orandnotis.json] valid query with OR AND NOT IS", checkQuery);
+			it("[valid/tripleand.json] valid query with triple and", checkQuery);
+			it("[valid/tripleor.json] valid query with triple or", checkQuery);
+			it("[invalid/invalidId.json] invalid id", checkQuery);
+			it("[valid/eq.json] query eq grade", checkQuery);
+			it("[valid/gT.json] query gt grade", checkQuery);
+			it("[valid/lt.json] query less than grade", checkQuery);
+			it("[valid/zeroresult.json] zero results", checkQuery);
+			it("[invalid/invalidNokeyNot.json] no keys for negation", checkQuery);
+			it("[valid/wildcardstart.json] query with wildcard starting", checkQuery);
+			it("[invalid/invalidIsKeyType.json] invalid string in IS", checkQuery);
+			it("[invalid/invalidNumberType.json] invalid type in number query", checkQuery);
+			it("[valid/allColumns2.json] column check 2", checkQuery);
+			it("[valid/allColumns.json] column check", checkQuery);
+			it("[valid/testSort.json] testing sorting", checkQuery);
+			it("[valid/megaTest.json] mega test sort", checkQuery);
+			it("[valid/noOrder.json] no order", checkQuery);
+			describe("transformations in sections", () => {
+				it("[invalid/invalidKeyInColumnMustBeInGroupOrApply.json] invalid missing key from colums", checkQuery);
+				it("[invalid/invalidKeyInGroup.json] invalid key in group", checkQuery);
+				it("[invalid/invalidDatasetInApplyField.json] invalid dataset in apply", checkQuery);
+				it("[invalid/invalidKeyInApplyField.json] invalid key in apply field", checkQuery);
+				it("[invalid/invalidKeyTypeForApply.json] invalid key type for apply", checkQuery);
+				it("[invalid/invalidTransformationInvalidKeyInApply.json] invalid key type for apply", checkQuery);
+				it("[invalid/invalidTransformationMissingApply.json] invalid key type for apply", checkQuery);
+				it("[invalid/invalidTransformationMissingGroup.json] invalid key type for apply", checkQuery);
+				it("[invalid/invalidTransformationMissingKeyInColumns.json] invalid key type for apply", checkQuery);
+				it("[invalid/invalidEmptyGroupArray.json] invalid group array", checkQuery);
+				it("[invalid/invalidTypeForApply.json] invalid type for apply", checkQuery);
+				it("[valid/validSectionsTransformation.json] valid section transformations", checkQuery);
+				it("[valid/validSectionsDoubleGroup.json] valid double group key transformation", checkQuery);
+				it("[invalid/invalidSectionsDoubleApplyFieldType.json] invalid apply field type", checkQuery);
+				it("[invalid/invalidDuplicateKeyInApply.json] invalid duplicate apply key", checkQuery);
+				it("[valid/validMaxSections.json] valid max sections", checkQuery);
+				it("[valid/validMinSections.json] valid min section", checkQuery);
+			});
+		});
+		// describe("Perform query tests for rooms", () => {
+		// 	before(async function () {
+		// 		facade = new InsightFacade();
 
-	// 	// 		// Add the datasets to InsightFacade once.
-	// 	// 		// Will *fail* if there is a problem reading ANY dataset.
-	// 	// 		const loadDatasetPromises: Promise<string[]>[] = [facade.addDataset("rooms", campus, InsightDatasetKind.Rooms)];
+		// 		// Add the datasets to InsightFacade once.
+		// 		// Will *fail* if there is a problem reading ANY dataset.
+		// 		const loadDatasetPromises: Promise<string[]>[] = [facade.addDataset("rooms", campus, InsightDatasetKind.Rooms)];
 
-	// 	// 		try {
-	// 	// 			await Promise.all(loadDatasetPromises);
-	// 	// 		} catch (err) {
-	// 	// 			throw new Error(`In PerformQuery Before hook, dataset(s) failed to be added. \n${err}`);
-	// 	// 		}
-	// 	// 	});
+		// 		try {
+		// 			await Promise.all(loadDatasetPromises);
+		// 		} catch (err) {
+		// 			throw new Error(`In PerformQuery Before hook, dataset(s) failed to be added. \n${err}`);
+		// 		}
+		// 	});
 
-	// 	// 	after(async function () {
-	// 	// 		await clearDisk();
-	// 	// 	});
+		// 	after(async function () {
+		// 		await clearDisk();
+		// 	});
 
-	// 	// 	// rooms
-	// 	// 	it("[invalid/emptykeys.json] no keys in keys array for order", checkQuery);
-	// 	// 	it("[invalid/invalidkeys.json] invalid keys in key array", checkQuery);
-	// 	// 	it("[invalid/invalidOrderDir.json] invalid directions in order", checkQuery);
-	// 	// 	it("[invalid/missingKeys.json] missing keys in order", checkQuery);
-	// 	// 	it("[invalid/morethanonedatasetcolumns.json] column has more than one dataset", checkQuery);
-	// 	// 	it("[invalid/invalidgroup.json] invalid group name", checkQuery);
+		// 	// rooms
+		// 	it("[invalid/emptykeys.json] no keys in keys array for order", checkQuery);
+		// 	it("[invalid/invalidkeys.json] invalid keys in key array", checkQuery);
+		// 	it("[invalid/invalidOrderDir.json] invalid directions in order", checkQuery);
+		// 	it("[invalid/missingKeys.json] missing keys in order", checkQuery);
+		// 	it("[invalid/morethanonedatasetcolumns.json] column has more than one dataset", checkQuery);
+		// 	it("[invalid/invalidgroup.json] invalid group name", checkQuery);
 
-	// 	// 	it("[valid/rooms.json] default rooms test", checkQuery);
-	// 	// 	it("[valid/validnokeys.json] no keys in order", checkQuery);
+		// 	it("[valid/rooms.json] default rooms test", checkQuery);
+		// 	it("[valid/validnokeys.json] no keys in order", checkQuery);
 
-	// 	// 	// check ordering
-	// 	// 	it("[valid/validAvg.json] valid avg and check order", checkQuery);
-	// 	// 	it("[valid/validCount.json] valid count and check order", checkQuery);
-	// 	// 	it("[valid/validmax.json] valid max and check order", checkQuery);
-	// 	// 	it("[valid/validmin.json] valid min and check order", checkQuery);
-	// 	// 	it("[valid/validsum.json] valid sum and check order", checkQuery);
+		// 	// check ordering
+		// 	it("[valid/validAvg.json] valid avg and check order", checkQuery);
+		// 	it("[valid/validCount.json] valid count and check order", checkQuery);
+		// 	it("[valid/validmax.json] valid max and check order", checkQuery);
+		// 	it("[valid/validmin.json] valid min and check order", checkQuery);
+		// 	it("[valid/validsum.json] valid sum and check order", checkQuery);
 
-	// 	// 	//invalid rooms
-	// 	// 	it("[invalid/invalidKeyTypeForApply.json] invalid key type for apply", checkQuery);
-	// 	// 	it("[invalidTransformationInvalidKeyInApply.json] invalid key type for apply", checkQuery);
-	// 	// 	it("[invalidTransformationMissingApply.json] invalid key type for apply", checkQuery);
-	// 	// 	it("[invalidTransformationMissingGroup.json] invalid key type for apply", checkQuery);
-	// 	// 	it("[invalidTransformationMissingKeyInColumns.json] invalid key type for apply", checkQuery);
-	// 	// 	it("[invalid/invalidEmptyGroupArray.json] invalid group array", checkQuery);
-	// 	// 	it("[invalid/invalidTypeForApply.json] invalid type for apply", checkQuery);
-	// 	// });
-	// });
+		// 	//invalid rooms
+		// 	it("[invalid/invalidKeyTypeForApply.json] invalid key type for apply", checkQuery);
+		// 	it("[invalidTransformationInvalidKeyInApply.json] invalid key type for apply", checkQuery);
+		// 	it("[invalidTransformationMissingApply.json] invalid key type for apply", checkQuery);
+		// 	it("[invalidTransformationMissingGroup.json] invalid key type for apply", checkQuery);
+		// 	it("[invalidTransformationMissingKeyInColumns.json] invalid key type for apply", checkQuery);
+		// 	it("[invalid/invalidEmptyGroupArray.json] invalid group array", checkQuery);
+		// 	it("[invalid/invalidTypeForApply.json] invalid type for apply", checkQuery);
+		// });
+	});
 
 	describe("listDatasets", function () {
 		const oneCourseDataset: InsightDataset = {

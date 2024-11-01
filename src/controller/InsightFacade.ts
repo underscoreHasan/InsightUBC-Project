@@ -13,7 +13,7 @@ import Section from "./Section";
 import { ASTTree, ValidFields } from "./ASTTree";
 import fs from "fs-extra";
 import path from "path";
-import { saveDatasetToDisk, loadDatasetFromDisk, addCacheToMemory } from "./DiskHandler";
+import { saveDatasetToDisk, addCacheToMemory } from "./DiskHandler";
 import { applyValidation, sortResults, transformResults, validateRooms } from "./TransformationManipulations";
 export const DATA_DIR = path.join(__dirname, "../../data");
 
@@ -128,10 +128,10 @@ export default class InsightFacade implements IInsightFacade {
 			"Audit" in section
 		) {
 			const overallSectionReplacementYear = 1900;
-			const year = section.Section === "overall" ? overallSectionReplacementYear : section.Year;
+			const year = Number(section.Section === "overall" ? overallSectionReplacementYear : section.Year);
 
 			return new Section(
-				section.id,
+				String(section.id),
 				section.Course,
 				section.Title,
 				section.Professor,
@@ -184,7 +184,7 @@ export default class InsightFacade implements IInsightFacade {
 
 	public async performQuery(query: any): Promise<InsightResult[]> {
 		const curDatasetID: string = this.validateAndPrepareQuery(query);
-		const sections = await loadDatasetFromDisk(curDatasetID);
+		const sections = this.getSections(curDatasetID);
 		const filteredResults = this.filterResults(query.WHERE, sections, curDatasetID);
 		const finalResults = this.transformAndSortResults(filteredResults, query, curDatasetID);
 
@@ -316,7 +316,15 @@ export default class InsightFacade implements IInsightFacade {
 			return this.validateNoRooms(options);
 		}
 	}
-
+	private getSections(datasetID: string): any[] {
+		let results: any[] = [];
+		this.datasets.forEach((dataset: Dataset) => {
+			if (dataset.getDatasetID() === datasetID) {
+				results = dataset.getSections();
+			}
+		});
+		return results;
+	}
 	private validateNoRooms(options: any): string {
 		//iterate through column and validate
 		const columns = options.COLUMNS;
