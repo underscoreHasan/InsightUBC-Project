@@ -412,7 +412,7 @@ describe("InsightFacade", function () {
 		});
 
 
-		it("should reject if index.htm present and no campus folder missing", async function () {
+		it("should reject if index.htm present but no campus folder", async function () {
 			try {
 				await facade.addDataset("campusIndexNoCampusFolder", campusIndexNoCampusFolder, InsightDatasetKind.Rooms);
 				expect.fail("Should have thrown!");
@@ -421,7 +421,7 @@ describe("InsightFacade", function () {
 			}
 		});
 
-		it("should reject if no index.htm present and campus folder missing", async function () {
+		it("should reject if no index.htm but campus folder present", async function () {
 			try {
 				await facade.addDataset("campusNoIndexCampusFolder", campusNoIndexCampusFolder, InsightDatasetKind.Rooms);
 				expect.fail("Should have thrown!");
@@ -430,7 +430,7 @@ describe("InsightFacade", function () {
 			}
 		});
 
-		it("should reject if no index.htm present and no campus folder missing", async function () {
+		it("should reject if no index.htm and no campus folder", async function () {
 			try {
 				await facade.addDataset("campusNoIndexNoCampusFolder", campusNoIndexNoCampusFolder, InsightDatasetKind.Rooms);
 				expect.fail("Should have thrown!");

@@ -4,6 +4,8 @@ import Section from "./Section";
 import Room from "./Room";
 import {InsightDatasetKind, InsightError, NotFoundError} from "./IInsightFacade";
 import {parse} from "parse5";
+import { Document, Element } from "parse5/dist/tree-adapters/default";
+
 
 export class DatasetHandler {
 	private datasetIDs: string[] = [];
@@ -76,6 +78,7 @@ export class DatasetHandler {
 		//find index.htm
 		//call a method to read the table in index.htm: returns array of the filepaths needed or throws an error if something wrong with index.htm
 		//pass array to another method to read each file amnd extract room info from that table
+		//validate room info
 		let indexContent;
 		if (zip.files["index.htm"] && !zip.files["index.htm"].dir) {
 			try {
@@ -110,7 +113,92 @@ export class DatasetHandler {
 		// find the building table (can be identified if any one <td> element with classes 'views-field' and 'views-field-field-building-address' is found)
 		// traverse the building table and along the way extract the value in the address column for every building's row in the table
 		// return a string array of all the addresses
-		const parsedHTML = parse(indexContent);
+		let parsedHTML;
+		try {
+			parsedHTML = parse(indexContent);
+		} catch {
+			throw new InsightError("Error parsing HTML content");
+		}
+		const allTables = this.findAllTables(parsedHTML);
+		const buildingTable = this.findBuildingTable(allTables);
+		return this.extractBuildingFilePaths(buildingTable);
+	}
+
+	private findAllTables(parsedHTML: Document): Document[] {
+		const tables: Document[] = [];
+
+		function recursiveSearch(node: Document) : void {
+			if (node.nodeName.toString() === 'table') {
+				tables.push(node);
+			}
+
+			if ('childNodes' in node) {
+				for (const child of node.childNodes) {
+					recursiveSearch(child as any as Document);
+				}
+			}
+		}
+
+		recursiveSearch(parsedHTML);
+		return tables;
+	}
+
+	private findBuildingTable(allTables: any[]): any | null {
+		for (const table of allTables) {
+			if (this.containsViewsTableClass(table)) {
+				return table;
+			}
+		}
+		return null;
+	}
+
+	private containsViewsTableClass(node: Element): boolean {
+		if (node.tagName === 'td' && node.attrs?.some(attr => attr.name === 'class' && attr.value.includes('views-field'))) {
+			return true;
+		}
+
+		if (node.childNodes) {
+			for (const child of node.childNodes) {
+				if (this.containsViewsTableClass(child as Element)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	private extractBuildingFilePaths(buildingTable: Document): string[] {
+		const filePaths: string[] = [];
+
+		// Helper function to traverse the DOM
+		const traverseAndExtract = (node: any): void => {
+			// Check if node is a 'td' element with classes 'views-field' and 'views-field-title'
+			if (node.tagName === 'td' && node.attrs?.some((attr: { value: string | string[]; }) => attr.value.includes('views-field-title'))) {
+				// Find the 'a' child element
+				const anchor = node.childNodes?.find((child: { nodeName: string; }) => child.nodeName === 'a') as Element;
+
+				if (anchor) {
+					const hrefAttr = anchor.attrs?.find(attr => attr.name === 'href');
+					if (hrefAttr) {
+						filePaths.push(hrefAttr.value);
+					}
+				}
+			}
+
+			if (node.childNodes) {
+				for (const child of node.childNodes) {
+					traverseAndExtract(child);
+				}
+			}
+		};
+
+		if (buildingTable.childNodes) {
+			for (const child of buildingTable.childNodes) {
+				traverseAndExtract(child);
+			}
+		}
+
+		return filePaths;
 	}
 
 	private async processRoomsFile(zip: JSZip, fileName: string): Promise<Room[]> {
