@@ -5,7 +5,7 @@ import Room from "./Room";
 import Building from "./Building";
 import {InsightDatasetKind, InsightError, NotFoundError} from "./IInsightFacade";
 import {parse} from "parse5";
-import { Document, Element } from "parse5/dist/tree-adapters/default";
+import {Document, Element} from "parse5/dist/tree-adapters/default";
 
 
 export class DatasetHandler {
@@ -50,12 +50,11 @@ export class DatasetHandler {
 			}
 			this.addSectionsDatasetToMemory(id, validSections);
 		} else if (kind === InsightDatasetKind.Rooms) {
-			// const validRooms = await this.extractRooms(zip);
-			// if (validRooms.length === 0) {
-			// 	throw new InsightError("no valid rooms");
-			// }
-			// this.addRoomsDatasetToMemory(id, validRooms);
-			await this.extractRooms(zip);
+			const validRooms = await this.extractRooms(zip);
+			if (validRooms.length === 0) {
+				throw new InsightError("no valid rooms");
+			}
+			this.addRoomsDatasetToMemory(id, validRooms);
 		} else {
 			throw new InsightError("Invalid kind!");
 		}
@@ -125,7 +124,7 @@ export class DatasetHandler {
 	}
 
 	private addSectionsDatasetToMemory(id: string, sections: Section[]): Dataset {
-		const currentDataset = new Dataset(id);
+		const currentDataset = new Dataset(id, InsightDatasetKind.Sections);
 		for (const section of sections) {
 			currentDataset.addSection(section);
 		}
@@ -190,7 +189,7 @@ export class DatasetHandler {
 		// 	console.log(`  Furniture: ${room.getFurniture()}`);
 		// 	console.log(`  Href: ${room.getHref()}`);
 		// }
-		if (roomResults.flat.length === 0) {
+		if (roomResults.flat().length === 0) {
 			throw new InsightError("No valid rooms")
 		} else {
 			return roomResults.flat();
@@ -310,20 +309,22 @@ export class DatasetHandler {
 	}
 
 	private async processRoomsFile(zip: JSZip, buildings: Building[]): Promise<Room[]> {
-		let rooms: Room[] = [];
-		for (const building of buildings) {
+		const promises: Promise<Room[]>[] = buildings.map(async (building) => {
 			const filePath = building.getDirectory();
 			if (zip.files[filePath] && !zip.files[filePath].dir) {
 				try {
 					const fileContent = await zip.files[filePath].async("text");
 					const parsedHTML = parse(fileContent);
-					rooms = rooms.concat(this.extractValidRooms(parsedHTML, building));
+					return this.extractValidRooms(parsedHTML, building);
 				} catch {
-					continue;
+					return [];
 				}
 			}
-		}
-		return rooms;
+			return [];
+		});
+
+		const roomsArrays = await Promise.all(promises);
+		return roomsArrays.flat();
 	}
 
 	private extractValidRooms(parsedHTML: any, building: Building): Room[] {
@@ -443,8 +444,7 @@ export class DatasetHandler {
 	}
 
 	private addRoomsDatasetToMemory(id: string, rooms: Room[]): Dataset {
-		//TODO: Complete Implementation
-		const currentDataset = new Dataset(id);
+		const currentDataset = new Dataset(id, InsightDatasetKind.Rooms);
 		for (const room of rooms) {
 			currentDataset.addRoom(room);
 		}

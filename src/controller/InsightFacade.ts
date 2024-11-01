@@ -24,7 +24,7 @@ export default class InsightFacade implements IInsightFacade {
 		try {
 			const zip = await this.datasetHandler.loadZip(content);
 			await this.datasetHandler.processZip(id, zip, kind);
-			await saveDatasetToDisk(this.datasetHandler.getDataset(id), id);
+			await saveDatasetToDisk(this.datasetHandler.getDataset(id), id, kind);
 		} catch (err) {
 			//TODO: make sure the correct error TYPES are thrown
 			if (err instanceof Error) {
@@ -214,8 +214,8 @@ export default class InsightFacade implements IInsightFacade {
 		await addCacheToMemory(this.datasetHandler.getDatasets(), this.datasetHandler.getDatasetIDs());
 		return this.datasetHandler.getDatasets().map((dataset) => ({
 			id: dataset.getDatasetID(),
-			kind: InsightDatasetKind.Sections,
-			numRows: dataset.getSections().length,
+			kind: dataset.getKind(),
+			numRows: dataset.getKind() === "sections" ? dataset.getSections().length : dataset.getRooms().length,
 		}));
 	}
 }
