@@ -14,7 +14,7 @@ import { ASTTree, ValidFields } from "./ASTTree";
 import fs from "fs-extra";
 import path from "path";
 import { saveDatasetToDisk, loadDatasetFromDisk, addCacheToMemory } from "./DiskHandler";
-import { validateRooms } from "./RoomManipulations";
+import { applyValidation, transformResults, validateRooms } from "./TransformationManipulations";
 export const DATA_DIR = path.join(__dirname, "../../data");
 
 export default class InsightFacade implements IInsightFacade {
@@ -186,7 +186,9 @@ export default class InsightFacade implements IInsightFacade {
 		this.validateQueryWhere(query.WHERE);
 		// validate columns and options
 		const curDatasetID: string = this.validateColumnsAndOptions(query);
-
+		if (query.TRANSFORMATIONS) {
+			applyValidation(query, curDatasetID);
+		}
 		if (!this.datasetIDs.includes(curDatasetID)) {
 			throw new InsightError("Dataset not in added lists");
 		}
@@ -209,13 +211,17 @@ export default class InsightFacade implements IInsightFacade {
 		//return results based on columns and options
 		const columnFiltered = filteredResults.map((section: any) => {
 			const result: any = [];
-			const columns = this.extractFilterColumns(query.OPTIONS.COLUMNS);
+			const columns = this.extractFilterColumns(query);
 			columns.forEach((column) => {
 				result[column] = section[column];
 			});
 			return result;
 		});
-		let sortedResult = columnFiltered;
+		let transformedResults = columnFiltered;
+		if (query.TRANSFORMATIONS) {
+			transformedResults = transformResults(transformedResults, query);
+		}
+		let sortedResult = transformedResults;
 		if (query.OPTIONS.ORDER) {
 			sortedResult = this.sortResults(columnFiltered, query.OPTIONS.ORDER.split("_")[1]);
 		}
@@ -269,11 +275,24 @@ export default class InsightFacade implements IInsightFacade {
 		});
 	}
 	// this function takes the OPTIONS.COLUMNS part and strips all the dataset id's from the front
-	private extractFilterColumns(columns: any): string[] {
+	private extractFilterColumns(query: any): string[] {
+		const columns = query.OPTIONS.COLUMNS;
+		const apply = query.TRANSFORMATIONS.APPLY;
 		const result: string[] = [];
 		columns.forEach((column: string) => {
-			result.push(column.split("_")[1]);
+			if (column.includes("_")) {
+				result.push(column.split("_")[1]);
+			}
 		});
+		if (apply.length > 1) {
+			apply.forEach((entry: any) => {
+				const column = Object.entries(entry)[0][1] as any;
+				const field = Object.entries(column)[0][1] as string;
+
+				result.push(field.split("_")[1]);
+			});
+		}
+
 		return result;
 	}
 

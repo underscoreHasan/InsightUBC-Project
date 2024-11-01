@@ -1,5 +1,5 @@
 {
-	"title": "rooms",
+	"title": "invalid transformation missing key in columns",
 	"input": {
 		"WHERE": {
 			"AND": [
@@ -29,7 +29,7 @@
 		},
 		"TRANSFORMATIONS": {
 			"GROUP": [
-				"rooms_shortname"
+				"rooms_shortnam"
 			],
 			"APPLY": [
 				{
@@ -40,19 +40,6 @@
 			]
 		}
 	},
-	"errorExpected": false,
-	"expected": [
-		{
-			"rooms_shortname": "OSBO",
-			"maxSeats": 442
-		},
-		{
-			"rooms_shortname": "HEBB",
-			"maxSeats": 375
-		},
-		{
-			"rooms_shortname": "LSC",
-			"maxSeats": 350
-		}
-	]
+	"errorExpected": true,
+	"expected": "InsightError"
 }

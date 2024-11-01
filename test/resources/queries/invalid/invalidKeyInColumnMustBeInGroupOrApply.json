@@ -1,0 +1,20 @@
+{
+	"title": "invalid key in column must be in group or apply",
+	"input": {
+		"WHERE": {
+			"LT": {
+				"sections_avg": 50
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": ["sections_dept", "sections_avg"],
+			"ORDER": "sections_dept"
+		},
+		"TRANSFORMATIONS": {
+			"GROUP": ["sections_dept"],
+			"APPLY": []
+		}
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}

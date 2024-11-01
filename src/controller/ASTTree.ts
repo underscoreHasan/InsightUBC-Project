@@ -11,6 +11,17 @@ export const ValidFields = new Set([
 	"pass",
 	"fail",
 	"audit",
+	"fullname",
+	"shortname",
+	"number",
+	"name",
+	"address",
+	"lat",
+	"lon",
+	"seats",
+	"type",
+	"furniture",
+	"href",
 ]);
 
 type LogicOperator = "AND" | "OR";

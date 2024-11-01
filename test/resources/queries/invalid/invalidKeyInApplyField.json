@@ -1,0 +1,21 @@
+{
+	"title": "invalid key in apply field",
+	"input": {
+		"WHERE": {},
+		"OPTIONS": {
+			"COLUMNS": ["sections_id", "sections_title", "overallAvg"]
+		},
+		"TRANSFORMATIONS": {
+			"GROUP": ["sections_id", "sections_title"],
+			"APPLY": [
+				{
+					"overallAvg": {
+						"AVG": "sections_BOB"
+					}
+				}
+			]
+		}
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}

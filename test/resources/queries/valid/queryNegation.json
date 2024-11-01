@@ -9,10 +9,7 @@
 			}
 		},
 		"OPTIONS": {
-			"COLUMNS": [
-				"sections_dept",
-				"sections_avg"
-			],
+			"COLUMNS": ["sections_dept", "sections_avg"],
 			"ORDER": "sections_avg"
 		}
 	},
@@ -30,5 +27,6 @@
 			"sections_dept": "math",
 			"sections_avg": 99.78
 		}
-	]
+	],
+	"order": true
 }
