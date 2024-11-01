@@ -78,27 +78,27 @@ describe("InsightFacade", function () {
 
 		it("should add with caching", async () => {
 			try {
-				await facade.addDataset("data", sections, InsightDatasetKind.Sections);
+				await facade.addDataset("data", oneCourse, InsightDatasetKind.Sections);
 			} catch {
 				expect.fail("Shouldnt get here");
 			}
 			const facade2 = new InsightFacade();
 			try {
-				await facade2.addDataset("data", sections, InsightDatasetKind.Sections);
+				await facade2.addDataset("data", oneCourse, InsightDatasetKind.Sections);
 			} catch (error) {
 				expect(error).to.be.instanceOf(InsightError);
 			}
 		});
 
 		it("should reject with  an empty dataset id", function () {
-			const result = facade.addDataset("", sections, InsightDatasetKind.Sections);
+			const result = facade.addDataset("", oneCourse, InsightDatasetKind.Sections);
 
 			return expect(result).to.eventually.be.rejectedWith(InsightError);
 		});
 
 		it("should reject with an underscore in the id", async () => {
 			try {
-				await facade.addDataset("_test", sections, InsightDatasetKind.Sections);
+				await facade.addDataset("_test", oneCourse, InsightDatasetKind.Sections);
 			} catch (err) {
 				return expect(err).to.be.instanceOf(InsightError);
 			}
@@ -107,12 +107,12 @@ describe("InsightFacade", function () {
 
 		it("should reject when id is already in the dataset", async () => {
 			try {
-				await facade.addDataset("existingData", sections, InsightDatasetKind.Sections);
+				await facade.addDataset("existingData", oneCourse, InsightDatasetKind.Sections);
 			} catch {
 				return expect.fail("Err shouldnt have been thrown");
 			}
 			try {
-				await facade.addDataset("existingData", sections, InsightDatasetKind.Sections);
+				await facade.addDataset("existingData", oneCourse, InsightDatasetKind.Sections);
 			} catch (err) {
 				return expect(err).to.be.instanceOf(InsightError);
 			}
@@ -122,7 +122,7 @@ describe("InsightFacade", function () {
 		it("should sucessfully add dataset", async () => {
 			let result: string[];
 			try {
-				result = await facade.addDataset("data", sections, InsightDatasetKind.Sections);
+				result = await facade.addDataset("data", oneCourse, InsightDatasetKind.Sections);
 			} catch {
 				return expect.fail("No error should be thrown");
 			}
@@ -133,8 +133,8 @@ describe("InsightFacade", function () {
 			let result: string[];
 
 			try {
-				result = await facade.addDataset("data", sections, InsightDatasetKind.Sections);
-				result = await facade.addDataset("data2", sections, InsightDatasetKind.Sections);
+				result = await facade.addDataset("data", oneCourse, InsightDatasetKind.Sections);
+				result = await facade.addDataset("data2", oneCourse, InsightDatasetKind.Sections);
 			} catch {
 				expect.fail("No error should be thrown");
 			}
@@ -144,7 +144,7 @@ describe("InsightFacade", function () {
 		//rejections due to dataset id
 		it("should reject with an empty dataset id", async function () {
 			try {
-				await facade.addDataset("", sections, InsightDatasetKind.Sections);
+				await facade.addDataset("", oneCourse, InsightDatasetKind.Sections);
 				expect.fail("Should have thrown!");
 			} catch (err) {
 				expect(err).to.be.instanceOf(InsightError);
@@ -153,7 +153,7 @@ describe("InsightFacade", function () {
 
 		it("should reject with a whitespace dataset id", async function () {
 			try {
-				await facade.addDataset("   ", sections, InsightDatasetKind.Sections);
+				await facade.addDataset("   ", oneCourse, InsightDatasetKind.Sections);
 				expect.fail("Should have thrown!");
 			} catch (err) {
 				expect(err).to.be.instanceOf(InsightError);
@@ -162,7 +162,7 @@ describe("InsightFacade", function () {
 
 		it("should reject with a _ dataset id", async function () {
 			try {
-				await facade.addDataset("_", sections, InsightDatasetKind.Sections);
+				await facade.addDataset("_", oneCourse, InsightDatasetKind.Sections);
 				expect.fail("Should have thrown!");
 			} catch (err) {
 				expect(err).to.be.instanceOf(InsightError);
@@ -171,7 +171,7 @@ describe("InsightFacade", function () {
 
 		it("should reject with a _dataset id", async function () {
 			try {
-				await facade.addDataset("_dataset", sections, InsightDatasetKind.Sections);
+				await facade.addDataset("_dataset", oneCourse, InsightDatasetKind.Sections);
 				expect.fail("Should have thrown!");
 			} catch (err) {
 				expect(err).to.be.instanceOf(InsightError);
@@ -180,7 +180,7 @@ describe("InsightFacade", function () {
 
 		it("should reject with a dataset_ id", async function () {
 			try {
-				await facade.addDataset("dataset_", sections, InsightDatasetKind.Sections);
+				await facade.addDataset("dataset_", oneCourse, InsightDatasetKind.Sections);
 				expect.fail("Should have thrown!");
 			} catch (err) {
 				expect(err).to.be.instanceOf(InsightError);
@@ -189,7 +189,7 @@ describe("InsightFacade", function () {
 
 		it("should reject with a data_set id", async function () {
 			try {
-				await facade.addDataset("data_set", sections, InsightDatasetKind.Sections);
+				await facade.addDataset("data_set", oneCourse, InsightDatasetKind.Sections);
 				expect.fail("Should have thrown!");
 			} catch (err) {
 				expect(err).to.be.instanceOf(InsightError);
@@ -386,7 +386,7 @@ describe("InsightFacade", function () {
 
 		it("should remove with caching", async () => {
 			try {
-				await facade.addDataset("data", sections, InsightDatasetKind.Sections);
+				await facade.addDataset("data", oneCourse, InsightDatasetKind.Sections);
 			} catch {
 				return expect.fail("Shouldnt get here");
 			}
@@ -401,7 +401,7 @@ describe("InsightFacade", function () {
 
 		it("should not return if case sensitive", async () => {
 			try {
-				await facade.addDataset("data", sections, InsightDatasetKind.Sections);
+				await facade.addDataset("data", oneCourse, InsightDatasetKind.Sections);
 				await facade.removeDataset("DATA");
 			} catch (error) {
 				return expect(error).to.be.instanceOf(NotFoundError);
@@ -436,7 +436,7 @@ describe("InsightFacade", function () {
 		});
 
 		it("should reject when trying to delete twice", async () => {
-			await facade.addDataset("existing", sections, InsightDatasetKind.Sections);
+			await facade.addDataset("existing", oneCourse, InsightDatasetKind.Sections);
 
 			try {
 				await facade.removeDataset("existing");
@@ -454,7 +454,7 @@ describe("InsightFacade", function () {
 
 		it("should delete data correctly", async () => {
 			try {
-				await facade.addDataset("data", sections, InsightDatasetKind.Sections);
+				await facade.addDataset("data", oneCourse, InsightDatasetKind.Sections);
 				await facade.removeDataset("data");
 			} catch {
 				return expect.fail("Shouldnt throw an error");
@@ -806,7 +806,7 @@ describe("InsightFacade", function () {
 
 		it("Should list data after caching", async () => {
 			try {
-				await facade.addDataset("data", sections, InsightDatasetKind.Sections);
+				await facade.addDataset("data", oneCourse, InsightDatasetKind.Sections);
 			} catch {
 				expect.fail("Shouldnt get here");
 			}
@@ -823,15 +823,15 @@ describe("InsightFacade", function () {
 		});
 
 		it("Should list some data", async () => {
-			await facade.addDataset("data", sections, InsightDatasetKind.Sections);
+			await facade.addDataset("data", oneCourse, InsightDatasetKind.Sections);
 			const result = await facade.listDatasets();
 			expect(result.length).to.equal(1);
 		});
 
 		it("Should list two data", async () => {
 			const expectedLength = 2;
-			await facade.addDataset("data", sections, InsightDatasetKind.Sections);
-			await facade.addDataset("data2", sections, InsightDatasetKind.Sections);
+			await facade.addDataset("data", oneCourse, InsightDatasetKind.Sections);
+			await facade.addDataset("data2", oneCourse, InsightDatasetKind.Sections);
 			const result = await facade.listDatasets();
 			expect(result.length).to.equal(expectedLength);
 		});
