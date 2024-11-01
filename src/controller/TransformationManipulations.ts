@@ -225,26 +225,53 @@ function constructFinalResult(aggregatedResult: any, columns: string[]): any {
 	}, {});
 }
 
-export function sortResults(array: any[], primaryField: string): any[] {
-	return [...array].sort((a: any, b: any) => {
-		if (a[primaryField] < b[primaryField]) {
-			return -1;
-		}
-		if (a[primaryField] > b[primaryField]) {
-			return 1;
-		}
+export function sortResults(results: any[], keys: string[], dir: "UP" | "DOWN" = "UP"): any[] {
+	const direction = dir === "DOWN" ? -1 : 1;
 
-		const fields = Object.keys(a).filter((field) => field !== primaryField);
+	// Process keys to ignore prefixes if present, for example "sections_avg" -> "avg"
+	const splitSortKeys = keys.map((key) => (key.includes("_") ? key.split("_")[1] : key));
 
-		for (const field of fields) {
-			if (a[field] < b[field]) {
-				return -1;
+	return results.sort((a, b) => {
+		for (const key of splitSortKeys) {
+			if (a[key] < b[key]) {
+				return -1 * direction;
 			}
-			if (a[field] > b[field]) {
-				return 1;
+			if (a[key] > b[key]) {
+				return 1 * direction;
 			}
 		}
-
 		return 0;
 	});
+}
+
+export function validateNoRooms(options: any): string {
+	//iterate through column and validate
+	const columns = options.COLUMNS;
+	let prevDatasetID = columns[0].split("_");
+
+	columns.forEach((field: any) => {
+		const splitField = field.split("_");
+		const curDatasetID = splitField[0];
+		const curField = splitField[1];
+		if (!curDatasetID === prevDatasetID || !ValidFields.has(curField)) {
+			throw new InsightError("Error with columns");
+		}
+		prevDatasetID = curDatasetID;
+	});
+
+	//validate order
+	const order = options.ORDER;
+	if (typeof order === "string") {
+		if (!columns.includes(order)) {
+			throw new InsightError("ORDER key must be part of COLUMNS or an apply key");
+		}
+	} else if (typeof order === "object") {
+		if (order.keys === undefined) {
+			throw new InsightError("No keys in order");
+		}
+		if (order.dir !== "UP" && order.dir !== "DOWN") {
+			throw new InsightError("ORDER direction must be 'UP' or 'DOWN'");
+		}
+	}
+	return prevDatasetID;
 }

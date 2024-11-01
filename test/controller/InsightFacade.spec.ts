@@ -721,6 +721,9 @@ describe("InsightFacade", function () {
 			it("[valid/testSort.json] testing sorting", checkQuery);
 			it("[valid/megaTest.json] mega test sort", checkQuery);
 			it("[valid/noOrder.json] no order", checkQuery);
+			it("[valid/testOrderSort.json] valid ordering", checkQuery);
+			it("[valid/testMulti2KeySort.json] multi key sort", checkQuery);
+			it("[valid/testMulti5KeySort.json] 5 multi keys", checkQuery);
 			describe("transformations in sections", () => {
 				it("[invalid/invalidKeyInColumnMustBeInGroupOrApply.json] invalid missing key from colums", checkQuery);
 				it("[invalid/invalidKeyInGroup.json] invalid key in group", checkQuery);
@@ -739,6 +742,8 @@ describe("InsightFacade", function () {
 				it("[invalid/invalidDuplicateKeyInApply.json] invalid duplicate apply key", checkQuery);
 				it("[valid/validMaxSections.json] valid max sections", checkQuery);
 				it("[valid/validMinSections.json] valid min section", checkQuery);
+				it("[valid/testMultiSort.json] testing multi sort keys", checkQuery);
+				it("[valid/testCount.json] testing count", checkQuery);
 			});
 		});
 		// describe("Perform query tests for rooms", () => {

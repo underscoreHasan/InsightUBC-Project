@@ -1,0 +1,450 @@
+{
+	"title": "test multi 5 key sort",
+	"input": {
+		"WHERE": {
+			"OR": [
+				{
+					"AND": [
+						{
+							"GT": {
+								"sections_avg": 90
+							}
+						},
+						{
+							"IS": {
+								"sections_dept": "adhe"
+							}
+						}
+					]
+				},
+				{
+					"AND": [
+						{
+							"EQ": {
+								"sections_avg": 95
+							}
+						},
+						{
+							"NOT": {
+								"IS": {
+									"sections_dept": "sowk"
+								}
+							}
+						}
+					]
+				}
+			]
+		},
+		"OPTIONS": {
+			"COLUMNS": ["sections_dept", "sections_avg", "maxPass", "sections_uuid", "counter"],
+			"ORDER": {
+				"dir": "DOWN",
+				"keys": ["sections_dept", "maxPass", "sections_avg", "sections_uuid"]
+			}
+		},
+		"TRANSFORMATIONS": {
+			"GROUP": ["sections_dept", "sections_avg", "sections_uuid"],
+			"APPLY": [
+				{
+					"maxPass": {
+						"MAX": "sections_pass"
+					}
+				},
+				{
+					"counter": {
+						"COUNT": "sections_id"
+					}
+				}
+			]
+		}
+	},
+	"errorExpected": false,
+	"expected": [
+		{
+			"sections_dept": "rhsc",
+			"sections_avg": 95,
+			"maxPass": 6,
+			"sections_uuid": "10582",
+			"counter": 1
+		},
+		{
+			"sections_dept": "psyc",
+			"sections_avg": 95,
+			"maxPass": 8,
+			"sections_uuid": "94901",
+			"counter": 1
+		},
+		{
+			"sections_dept": "psyc",
+			"sections_avg": 95,
+			"maxPass": 8,
+			"sections_uuid": "94900",
+			"counter": 1
+		},
+		{
+			"sections_dept": "obst",
+			"sections_avg": 95,
+			"maxPass": 1,
+			"sections_uuid": "98843",
+			"counter": 1
+		},
+		{
+			"sections_dept": "nurs",
+			"sections_avg": 95,
+			"maxPass": 9,
+			"sections_uuid": "96196",
+			"counter": 1
+		},
+		{
+			"sections_dept": "nurs",
+			"sections_avg": 95,
+			"maxPass": 9,
+			"sections_uuid": "96195",
+			"counter": 1
+		},
+		{
+			"sections_dept": "musc",
+			"sections_avg": 95,
+			"maxPass": 7,
+			"sections_uuid": "28878",
+			"counter": 1
+		},
+		{
+			"sections_dept": "musc",
+			"sections_avg": 95,
+			"maxPass": 7,
+			"sections_uuid": "28877",
+			"counter": 1
+		},
+		{
+			"sections_dept": "musc",
+			"sections_avg": 95,
+			"maxPass": 4,
+			"sections_uuid": "93964",
+			"counter": 1
+		},
+		{
+			"sections_dept": "musc",
+			"sections_avg": 95,
+			"maxPass": 4,
+			"sections_uuid": "93963",
+			"counter": 1
+		},
+		{
+			"sections_dept": "musc",
+			"sections_avg": 95,
+			"maxPass": 4,
+			"sections_uuid": "19491",
+			"counter": 1
+		},
+		{
+			"sections_dept": "musc",
+			"sections_avg": 95,
+			"maxPass": 4,
+			"sections_uuid": "19490",
+			"counter": 1
+		},
+		{
+			"sections_dept": "mtrl",
+			"sections_avg": 95,
+			"maxPass": 6,
+			"sections_uuid": "49774",
+			"counter": 1
+		},
+		{
+			"sections_dept": "mtrl",
+			"sections_avg": 95,
+			"maxPass": 6,
+			"sections_uuid": "49773",
+			"counter": 1
+		},
+		{
+			"sections_dept": "mtrl",
+			"sections_avg": 95,
+			"maxPass": 1,
+			"sections_uuid": "2676",
+			"counter": 1
+		},
+		{
+			"sections_dept": "math",
+			"sections_avg": 95,
+			"maxPass": 6,
+			"sections_uuid": "29972",
+			"counter": 1
+		},
+		{
+			"sections_dept": "math",
+			"sections_avg": 95,
+			"maxPass": 6,
+			"sections_uuid": "29971",
+			"counter": 1
+		},
+		{
+			"sections_dept": "kin",
+			"sections_avg": 95,
+			"maxPass": 7,
+			"sections_uuid": "59530",
+			"counter": 1
+		},
+		{
+			"sections_dept": "kin",
+			"sections_avg": 95,
+			"maxPass": 5,
+			"sections_uuid": "72706",
+			"counter": 1
+		},
+		{
+			"sections_dept": "kin",
+			"sections_avg": 95,
+			"maxPass": 4,
+			"sections_uuid": "86831",
+			"counter": 1
+		},
+		{
+			"sections_dept": "epse",
+			"sections_avg": 95,
+			"maxPass": 9,
+			"sections_uuid": "86975",
+			"counter": 1
+		},
+		{
+			"sections_dept": "epse",
+			"sections_avg": 95,
+			"maxPass": 9,
+			"sections_uuid": "86974",
+			"counter": 1
+		},
+		{
+			"sections_dept": "epse",
+			"sections_avg": 95,
+			"maxPass": 7,
+			"sections_uuid": "76362",
+			"counter": 1
+		},
+		{
+			"sections_dept": "edcp",
+			"sections_avg": 95,
+			"maxPass": 19,
+			"sections_uuid": "16691",
+			"counter": 1
+		},
+		{
+			"sections_dept": "edcp",
+			"sections_avg": 95,
+			"maxPass": 19,
+			"sections_uuid": "16690",
+			"counter": 1
+		},
+		{
+			"sections_dept": "econ",
+			"sections_avg": 95,
+			"maxPass": 3,
+			"sections_uuid": "10017",
+			"counter": 1
+		},
+		{
+			"sections_dept": "econ",
+			"sections_avg": 95,
+			"maxPass": 3,
+			"sections_uuid": "10016",
+			"counter": 1
+		},
+		{
+			"sections_dept": "crwr",
+			"sections_avg": 95,
+			"maxPass": 3,
+			"sections_uuid": "81354",
+			"counter": 1
+		},
+		{
+			"sections_dept": "crwr",
+			"sections_avg": 95,
+			"maxPass": 3,
+			"sections_uuid": "71171",
+			"counter": 1
+		},
+		{
+			"sections_dept": "crwr",
+			"sections_avg": 95,
+			"maxPass": 2,
+			"sections_uuid": "92881",
+			"counter": 1
+		},
+		{
+			"sections_dept": "crwr",
+			"sections_avg": 95,
+			"maxPass": 2,
+			"sections_uuid": "26257",
+			"counter": 1
+		},
+		{
+			"sections_dept": "crwr",
+			"sections_avg": 95,
+			"maxPass": 1,
+			"sections_uuid": "75158",
+			"counter": 1
+		},
+		{
+			"sections_dept": "crwr",
+			"sections_avg": 95,
+			"maxPass": 1,
+			"sections_uuid": "46407",
+			"counter": 1
+		},
+		{
+			"sections_dept": "crwr",
+			"sections_avg": 95,
+			"maxPass": 1,
+			"sections_uuid": "46406",
+			"counter": 1
+		},
+		{
+			"sections_dept": "cpsc",
+			"sections_avg": 95,
+			"maxPass": 1,
+			"sections_uuid": "1386",
+			"counter": 1
+		},
+		{
+			"sections_dept": "cpsc",
+			"sections_avg": 95,
+			"maxPass": 1,
+			"sections_uuid": "1385",
+			"counter": 1
+		},
+		{
+			"sections_dept": "cnps",
+			"sections_avg": 95,
+			"maxPass": 4,
+			"sections_uuid": "28350",
+			"counter": 1
+		},
+		{
+			"sections_dept": "cnps",
+			"sections_avg": 95,
+			"maxPass": 4,
+			"sections_uuid": "28349",
+			"counter": 1
+		},
+		{
+			"sections_dept": "bmeg",
+			"sections_avg": 95,
+			"maxPass": 2,
+			"sections_uuid": "43502",
+			"counter": 1
+		},
+		{
+			"sections_dept": "bmeg",
+			"sections_avg": 95,
+			"maxPass": 2,
+			"sections_uuid": "43501",
+			"counter": 1
+		},
+		{
+			"sections_dept": "adhe",
+			"sections_avg": 90.02,
+			"maxPass": 62,
+			"sections_uuid": "19184",
+			"counter": 1
+		},
+		{
+			"sections_dept": "adhe",
+			"sections_avg": 90.85,
+			"maxPass": 34,
+			"sections_uuid": "46425",
+			"counter": 1
+		},
+		{
+			"sections_dept": "adhe",
+			"sections_avg": 93.33,
+			"maxPass": 33,
+			"sections_uuid": "19182",
+			"counter": 1
+		},
+		{
+			"sections_dept": "adhe",
+			"sections_avg": 90.82,
+			"maxPass": 33,
+			"sections_uuid": "68543",
+			"counter": 1
+		},
+		{
+			"sections_dept": "adhe",
+			"sections_avg": 90.16,
+			"maxPass": 31,
+			"sections_uuid": "68557",
+			"counter": 1
+		},
+		{
+			"sections_dept": "adhe",
+			"sections_avg": 90.17,
+			"maxPass": 29,
+			"sections_uuid": "75628",
+			"counter": 1
+		},
+		{
+			"sections_dept": "adhe",
+			"sections_avg": 91.29,
+			"maxPass": 28,
+			"sections_uuid": "19187",
+			"counter": 1
+		},
+		{
+			"sections_dept": "adhe",
+			"sections_avg": 96.11,
+			"maxPass": 27,
+			"sections_uuid": "68539",
+			"counter": 1
+		},
+		{
+			"sections_dept": "adhe",
+			"sections_avg": 92.54,
+			"maxPass": 26,
+			"sections_uuid": "68540",
+			"counter": 1
+		},
+		{
+			"sections_dept": "adhe",
+			"sections_avg": 90.72,
+			"maxPass": 25,
+			"sections_uuid": "91932",
+			"counter": 1
+		},
+		{
+			"sections_dept": "adhe",
+			"sections_avg": 91.48,
+			"maxPass": 23,
+			"sections_uuid": "46423",
+			"counter": 1
+		},
+		{
+			"sections_dept": "adhe",
+			"sections_avg": 91.33,
+			"maxPass": 18,
+			"sections_uuid": "85075",
+			"counter": 1
+		},
+		{
+			"sections_dept": "adhe",
+			"sections_avg": 91.33,
+			"maxPass": 18,
+			"sections_uuid": "85074",
+			"counter": 1
+		},
+		{
+			"sections_dept": "adhe",
+			"sections_avg": 90.5,
+			"maxPass": 18,
+			"sections_uuid": "79479",
+			"counter": 1
+		},
+		{
+			"sections_dept": "adhe",
+			"sections_avg": 90.18,
+			"maxPass": 11,
+			"sections_uuid": "78875",
+			"counter": 1
+		}
+	],
+	"order": true
+}

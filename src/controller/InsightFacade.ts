@@ -14,7 +14,13 @@ import { ASTTree, ValidFields } from "./ASTTree";
 import fs from "fs-extra";
 import path from "path";
 import { saveDatasetToDisk, addCacheToMemory } from "./DiskHandler";
-import { applyValidation, sortResults, transformResults, validateRooms } from "./TransformationManipulations";
+import {
+	applyValidation,
+	sortResults,
+	transformResults,
+	validateNoRooms,
+	validateRooms,
+} from "./TransformationManipulations";
 export const DATA_DIR = path.join(__dirname, "../../data");
 
 export default class InsightFacade implements IInsightFacade {
@@ -230,7 +236,17 @@ export default class InsightFacade implements IInsightFacade {
 
 		let sortedResult = transformedResults;
 		if (query.OPTIONS.ORDER) {
-			sortedResult = sortResults(transformedResults, query.OPTIONS.ORDER.split("_")[1]);
+			const order = query.OPTIONS.ORDER;
+			if (typeof order === "string") {
+				// Single-column sorting, defaults to ascending ("UP") order
+				sortedResult = sortResults(transformedResults, [order], "UP");
+			} else if (typeof order === "object" && Array.isArray(order.keys)) {
+				// Multi-column sorting with specified direction ("UP" or "DOWN")
+				const { keys, dir } = order;
+				sortedResult = sortResults(transformedResults, keys, dir || "UP");
+			} else {
+				throw new InsightError("Invalid ORDER format in OPTIONS");
+			}
 		}
 
 		return this.constructFinalResult(sortedResult, curDatasetID, query);
@@ -313,7 +329,7 @@ export default class InsightFacade implements IInsightFacade {
 		if (queryOptions.TRANSFORMATIONS !== undefined) {
 			return validateRooms(options);
 		} else {
-			return this.validateNoRooms(options);
+			return validateNoRooms(options);
 		}
 	}
 	private getSections(datasetID: string): any[] {
@@ -324,33 +340,6 @@ export default class InsightFacade implements IInsightFacade {
 			}
 		});
 		return results;
-	}
-	private validateNoRooms(options: any): string {
-		//iterate through column and validate
-		const columns = options.COLUMNS;
-		let prevDatasetID = columns[0].split("_");
-
-		columns.forEach((field: any) => {
-			const splitField = field.split("_");
-			const curDatasetID = splitField[0];
-			const curField = splitField[1];
-			if (!curDatasetID === prevDatasetID || !ValidFields.has(curField)) {
-				throw new InsightError("Error with columns");
-			}
-			prevDatasetID = curDatasetID;
-		});
-
-		//validate order
-		const order = options.ORDER;
-		if (order !== undefined) {
-			if (!columns.includes(order)) {
-				throw new InsightError("order has to be part of columns");
-			}
-			if (order.substring(0, order.indexOf("_")) !== prevDatasetID) {
-				throw new InsightError("order is referencing an invalid dataset");
-			}
-		}
-		return prevDatasetID;
 	}
 
 	public async listDatasets(): Promise<InsightDataset[]> {
