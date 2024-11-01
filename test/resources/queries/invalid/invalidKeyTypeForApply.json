@@ -33,6 +33,6 @@
 			]
 		}
 	},
-	"errorExpected": false,
+	"errorExpected": true,
 	"expected": "InsightError"
 }

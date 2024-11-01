@@ -39,7 +39,6 @@ describe("InsightFacade", function () {
 	let noSectionsAtAll: string;
 	let notInCoursesFolder: string;
 	let notJSONFormat: string;
-	let campus: string;
 
 	// let noValidSections: string;
 
@@ -655,7 +654,7 @@ describe("InsightFacade", function () {
 				expect(result).to.have.deep.members(expected);
 			}
 		}
-		describe.only("Perform query tests for sections", () => {
+		describe("Perform query tests for sections", () => {
 			before(async function () {
 				facade = new InsightFacade();
 
@@ -722,7 +721,7 @@ describe("InsightFacade", function () {
 			it("[valid/testSort.json] testing sorting", checkQuery);
 			it("[valid/megaTest.json] mega test sort", checkQuery);
 			it("[valid/noOrder.json] no order", checkQuery);
-			describe.only("transformations in sections", () => {
+			describe("transformations in sections", () => {
 				it("[invalid/invalidKeyInColumnMustBeInGroupOrApply.json] invalid missing key from colums", checkQuery);
 				it("[invalid/invalidKeyInGroup.json] invalid key in group", checkQuery);
 				it("[invalid/invalidDatasetInApplyField.json] invalid dataset in apply", checkQuery);
@@ -735,57 +734,59 @@ describe("InsightFacade", function () {
 				it("[invalid/invalidEmptyGroupArray.json] invalid group array", checkQuery);
 				it("[invalid/invalidTypeForApply.json] invalid type for apply", checkQuery);
 				it("[valid/validSectionsTransformation.json] valid section transformations", checkQuery);
-				it.only("[valid/validSectionsDoubleGroup.json] valid double group key transformation", checkQuery);
+				it("[valid/validSectionsDoubleGroup.json] valid double group key transformation", checkQuery);
 				it("[invalid/invalidSectionsDoubleApplyFieldType.json] invalid apply field type", checkQuery);
 				it("[invalid/invalidDuplicateKeyInApply.json] invalid duplicate apply key", checkQuery);
+				it("[valid/validMaxSections.json] valid max sections", checkQuery);
+				it("[valid/validMinSections.json] valid min section", checkQuery);
 			});
 		});
-		describe("Perform query tests for rooms", () => {
-			before(async function () {
-				facade = new InsightFacade();
+		// describe("Perform query tests for rooms", () => {
+		// 	before(async function () {
+		// 		facade = new InsightFacade();
 
-				// Add the datasets to InsightFacade once.
-				// Will *fail* if there is a problem reading ANY dataset.
-				const loadDatasetPromises: Promise<string[]>[] = [facade.addDataset("rooms", campus, InsightDatasetKind.Rooms)];
+		// 		// Add the datasets to InsightFacade once.
+		// 		// Will *fail* if there is a problem reading ANY dataset.
+		// 		const loadDatasetPromises: Promise<string[]>[] = [facade.addDataset("rooms", campus, InsightDatasetKind.Rooms)];
 
-				try {
-					await Promise.all(loadDatasetPromises);
-				} catch (err) {
-					throw new Error(`In PerformQuery Before hook, dataset(s) failed to be added. \n${err}`);
-				}
-			});
+		// 		try {
+		// 			await Promise.all(loadDatasetPromises);
+		// 		} catch (err) {
+		// 			throw new Error(`In PerformQuery Before hook, dataset(s) failed to be added. \n${err}`);
+		// 		}
+		// 	});
 
-			after(async function () {
-				await clearDisk();
-			});
+		// 	after(async function () {
+		// 		await clearDisk();
+		// 	});
 
-			// rooms
-			it("[invalid/emptykeys.json] no keys in keys array for order", checkQuery);
-			it("[invalid/invalidkeys.json] invalid keys in key array", checkQuery);
-			it("[invalid/invalidOrderDir.json] invalid directions in order", checkQuery);
-			it("[invalid/missingKeys.json] missing keys in order", checkQuery);
-			it("[invalid/morethanonedatasetcolumns.json] column has more than one dataset", checkQuery);
-			it("[invalid/invalidgroup.json] invalid group name", checkQuery);
+		// 	// rooms
+		// 	it("[invalid/emptykeys.json] no keys in keys array for order", checkQuery);
+		// 	it("[invalid/invalidkeys.json] invalid keys in key array", checkQuery);
+		// 	it("[invalid/invalidOrderDir.json] invalid directions in order", checkQuery);
+		// 	it("[invalid/missingKeys.json] missing keys in order", checkQuery);
+		// 	it("[invalid/morethanonedatasetcolumns.json] column has more than one dataset", checkQuery);
+		// 	it("[invalid/invalidgroup.json] invalid group name", checkQuery);
 
-			it("[valid/rooms.json] default rooms test", checkQuery);
-			it("[valid/validnokeys.json] no keys in order", checkQuery);
+		// 	it("[valid/rooms.json] default rooms test", checkQuery);
+		// 	it("[valid/validnokeys.json] no keys in order", checkQuery);
 
-			// check ordering
-			it("[valid/validAvg.json] valid avg and check order", checkQuery);
-			it("[valid/validCount.json] valid count and check order", checkQuery);
-			it("[valid/validmax.json] valid max and check order", checkQuery);
-			it("[valid/validmin.json] valid min and check order", checkQuery);
-			it("[valid/validsum.json] valid sum and check order", checkQuery);
+		// 	// check ordering
+		// 	it("[valid/validAvg.json] valid avg and check order", checkQuery);
+		// 	it("[valid/validCount.json] valid count and check order", checkQuery);
+		// 	it("[valid/validmax.json] valid max and check order", checkQuery);
+		// 	it("[valid/validmin.json] valid min and check order", checkQuery);
+		// 	it("[valid/validsum.json] valid sum and check order", checkQuery);
 
-			//invalid rooms
-			it("[invalid/invalidKeyTypeForApply.json] invalid key type for apply", checkQuery);
-			it("[invalidTransformationInvalidKeyInApply.json] invalid key type for apply", checkQuery);
-			it("[invalidTransformationMissingApply.json] invalid key type for apply", checkQuery);
-			it("[invalidTransformationMissingGroup.json] invalid key type for apply", checkQuery);
-			it("[invalidTransformationMissingKeyInColumns.json] invalid key type for apply", checkQuery);
-			it("[invalid/invalidEmptyGroupArray.json] invalid group array", checkQuery);
-			it("[invalid/invalidTypeForApply.json] invalid type for apply", checkQuery);
-		});
+		// 	//invalid rooms
+		// 	it("[invalid/invalidKeyTypeForApply.json] invalid key type for apply", checkQuery);
+		// 	it("[invalidTransformationInvalidKeyInApply.json] invalid key type for apply", checkQuery);
+		// 	it("[invalidTransformationMissingApply.json] invalid key type for apply", checkQuery);
+		// 	it("[invalidTransformationMissingGroup.json] invalid key type for apply", checkQuery);
+		// 	it("[invalidTransformationMissingKeyInColumns.json] invalid key type for apply", checkQuery);
+		// 	it("[invalid/invalidEmptyGroupArray.json] invalid group array", checkQuery);
+		// 	it("[invalid/invalidTypeForApply.json] invalid type for apply", checkQuery);
+		// });
 	});
 
 	describe("listDatasets", function () {

@@ -1,6 +1,6 @@
-import { create } from "domain";
 import { ValidFields } from "./ASTTree";
 import { InsightError } from "./IInsightFacade";
+import Decimal from "decimal.js";
 
 export const validApplyToken = new Set(["MAX", "MIN", "AVG", "COUNT", "SUM"]);
 
@@ -68,8 +68,8 @@ export function transformResults(data: any, query: any): any {
 		return entry.split("_")[1];
 	});
 	const groupedResults = createGroupings(data, groups);
-	applyToGroups(groupedResults, query.TRANSFORMATIONS.APPLY);
-	return [];
+	const results = applyToGroups(groupedResults, query);
+	return results;
 }
 
 function validateTransformations(options: any, transformations: any, datasetID: string): void {
@@ -86,9 +86,12 @@ function validateTransformations(options: any, transformations: any, datasetID: 
 	const requestedKeys = new Set<string>();
 	// parse through transformations and get all the keys
 	group.forEach((key: string) => {
+		if (!columns.includes(key)) {
+			throw new InsightError("Key not in columns");
+		}
 		requestedKeys.add(key);
 	});
-	validateApply(apply, datasetID, requestedKeys);
+	validateApply(apply, datasetID, requestedKeys, columns);
 	columns.forEach((key: string) => {
 		if (!requestedKeys.has(key)) {
 			throw new InsightError("Key not in columns");
@@ -96,7 +99,7 @@ function validateTransformations(options: any, transformations: any, datasetID: 
 	});
 }
 
-function validateApply(apply: any, datasetID: string, requestedKeys: Set<string>): void {
+function validateApply(apply: any, datasetID: string, requestedKeys: Set<string>, columns: any): void {
 	const applyKeys: any[] = [];
 	apply.forEach((obj: any) => {
 		if (Object.keys(obj).length > 1) {
@@ -113,6 +116,9 @@ function validateApply(apply: any, datasetID: string, requestedKeys: Set<string>
 		}
 
 		const applyQuery: string = Object.entries(applyRule)[0][1] as string;
+		if (typeof applyQuery !== "string") {
+			throw new InsightError("Wrong type in apply");
+		}
 		const [curDataset, field] = applyQuery.split("_");
 		if (curDataset !== datasetID) {
 			throw new InsightError("Multiple datasets in apply field");
@@ -122,6 +128,9 @@ function validateApply(apply: any, datasetID: string, requestedKeys: Set<string>
 		}
 		if (Object.keys(applyRule)[0] !== "COUNT" && !numericFields.has(field)) {
 			throw new InsightError("Wrong type for token in apply");
+		}
+		if (!columns.includes(key)) {
+			throw new InsightError("Key not in columns");
 		}
 		requestedKeys.add(key);
 	});
@@ -144,10 +153,98 @@ function createGroupings(data: any, groups: any): Map<string, any[]> {
 	return groupings;
 }
 
-function applyToGroups(data: any, applyRules: any): any[] {
-	console.log(data);
-	data.forEach((group: any) => {
-		// console.log(group);
+function applyToGroups(groupedData: Map<string, any[]>, query: any): any[] {
+	const results: any[] = [];
+	const applyRules = query.TRANSFORMATIONS.APPLY;
+	const columns = query.OPTIONS.COLUMNS;
+	const groupFields = query.TRANSFORMATIONS.GROUP;
+
+	for (const [groupKey, entries] of groupedData.entries()) {
+		const aggregatedResult: any = applyAggregation(entries, applyRules);
+		populateGroupFields(aggregatedResult, groupKey, groupFields);
+		const finalResult = constructFinalResult(aggregatedResult, columns);
+		results.push(finalResult);
+	}
+	return results;
+}
+
+function applyAggregation(entries: any[], applyRules: any[]): any {
+	const aggregatedResult: any = {};
+	applyRules.forEach((applyRule: any) => {
+		const applyKey = Object.keys(applyRule)[0];
+		const [token, field] = Object.entries(applyRule[applyKey])[0] as [any, any];
+		aggregatedResult[applyKey] = calculateAggregation(token, field.split("_")[1], entries);
 	});
-	return [];
+	return aggregatedResult;
+}
+
+function calculateAggregation(token: string, field: string, entries: any[]): any {
+	const two = 2;
+	switch (token) {
+		case "MAX":
+			return Math.max(...entries.map((entry: any) => entry[field]));
+		case "MIN":
+			return Math.min(...entries.map((entry: any) => entry[field]));
+		case "AVG": {
+			let total = new Decimal(0);
+			entries.forEach((entry: any) => (total = total.add(entry[field])));
+			return Number((total.toNumber() / entries.length).toFixed(two));
+		}
+		case "SUM": {
+			let total = new Decimal(0);
+			entries.forEach((entry: any) => (total = total.add(new Decimal(entry[field]))));
+			return Number(total.toFixed(two));
+		}
+		case "COUNT": {
+			const uniqueValues = new Set(entries.map((entry: any) => entry[field]));
+			return uniqueValues.size;
+		}
+		default:
+			throw new Error(`Unknown apply token: ${token}`);
+	}
+}
+
+function populateGroupFields(aggregatedResult: any, groupKey: string, groupFields: any[]): void {
+	const groupKeyFields = groupKey.split("_");
+	groupFields.forEach((groupField: string, index: number) => {
+		const originalField = groupField.split("_")[1];
+		aggregatedResult[originalField] = groupKeyFields[index];
+	});
+}
+
+function constructFinalResult(aggregatedResult: any, columns: string[]): any {
+	return columns.reduce((acc: any, column: string) => {
+		const field = column.includes("_") ? column.split("_")[1] : column;
+		if (numericFields.has(field)) {
+			const value = Number(aggregatedResult[field]);
+			acc[field] = value;
+		} else {
+			acc[field] = aggregatedResult[field];
+		}
+		return acc;
+	}, {});
+}
+
+export function sortResults(array: any[], primaryField: string): any[] {
+	return [...array].sort((a: any, b: any) => {
+		if (a[primaryField] < b[primaryField]) {
+			return -1;
+		}
+		if (a[primaryField] > b[primaryField]) {
+			return 1;
+		}
+
+		const fields = Object.keys(a).filter((field) => field !== primaryField);
+
+		for (const field of fields) {
+			if (a[field] < b[field]) {
+				return -1;
+			}
+			if (a[field] > b[field]) {
+				return 1;
+			}
+		}
+
+		return 0;
+	});
 }

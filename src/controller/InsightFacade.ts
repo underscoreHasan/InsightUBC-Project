@@ -14,7 +14,7 @@ import { ASTTree, ValidFields } from "./ASTTree";
 import fs from "fs-extra";
 import path from "path";
 import { saveDatasetToDisk, loadDatasetFromDisk, addCacheToMemory } from "./DiskHandler";
-import { applyValidation, transformResults, validateRooms } from "./TransformationManipulations";
+import { applyValidation, sortResults, transformResults, validateRooms } from "./TransformationManipulations";
 export const DATA_DIR = path.join(__dirname, "../../data");
 
 export default class InsightFacade implements IInsightFacade {
@@ -183,8 +183,16 @@ export default class InsightFacade implements IInsightFacade {
 	}
 
 	public async performQuery(query: any): Promise<InsightResult[]> {
+		const curDatasetID: string = this.validateAndPrepareQuery(query);
+		const sections = await loadDatasetFromDisk(curDatasetID);
+		const filteredResults = this.filterResults(query.WHERE, sections, curDatasetID);
+		const finalResults = this.transformAndSortResults(filteredResults, query, curDatasetID);
+
+		return finalResults as InsightResult[];
+	}
+
+	private validateAndPrepareQuery(query: any): string {
 		this.validateQueryWhere(query.WHERE);
-		// validate columns and options
 		const curDatasetID: string = this.validateColumnsAndOptions(query);
 		if (query.TRANSFORMATIONS) {
 			applyValidation(query, curDatasetID);
@@ -192,105 +200,84 @@ export default class InsightFacade implements IInsightFacade {
 		if (!this.datasetIDs.includes(curDatasetID)) {
 			throw new InsightError("Dataset not in added lists");
 		}
+		return curDatasetID;
+	}
 
-		//create AST tree
-		const queryParams = query.WHERE;
-		let filteredResults;
-		const sections = await loadDatasetFromDisk(curDatasetID);
-
-		if (Object.entries(queryParams).length !== 0) {
-			const createdASTTree = new ASTTree(queryParams, curDatasetID);
-			// createdASTTree.printTree();
-			//apply search on section
-			filteredResults = sections.filter((section: any) => {
-				return createdASTTree.evaluate(section);
-			});
-		} else {
-			filteredResults = sections;
+	private filterResults(queryParams: any, sections: any[], curDatasetID: string): any[] {
+		if (Object.entries(queryParams).length === 0) {
+			return sections; // Return all if no filters are applied
 		}
-		//return results based on columns and options
+		const createdASTTree = new ASTTree(queryParams, curDatasetID);
+		return sections.filter((section: any) => {
+			return createdASTTree.evaluate(section);
+		});
+	}
+
+	private transformAndSortResults(filteredResults: any[], query: any, curDatasetID: string): any[] {
 		const columnFiltered = filteredResults.map((section: any) => {
-			const result: any = [];
+			const result: any = {};
 			const columns = this.extractFilterColumns(query);
 			columns.forEach((column) => {
 				result[column] = section[column];
 			});
 			return result;
 		});
+
 		let transformedResults = columnFiltered;
 		if (query.TRANSFORMATIONS) {
 			transformedResults = transformResults(transformedResults, query);
 		}
+
 		let sortedResult = transformedResults;
 		if (query.OPTIONS.ORDER) {
-			sortedResult = this.sortResults(columnFiltered, query.OPTIONS.ORDER.split("_")[1]);
+			sortedResult = sortResults(transformedResults, query.OPTIONS.ORDER.split("_")[1]);
 		}
-		const result = this.constructFinalResult(sortedResult, curDatasetID);
 
-		return result as InsightResult[];
+		return this.constructFinalResult(sortedResult, curDatasetID, query);
 	}
 
 	//this function creates the results into the insightresult type
-	private constructFinalResult(sortedResult: any[], curDatasetID: string): any {
+	private constructFinalResult(sortedResult: any[], curDatasetID: string, query: any): any {
 		const result: any[] = [];
-
+		const maxNum = 5000;
+		const columns = query.OPTIONS.COLUMNS;
 		sortedResult.forEach((entry) => {
 			const newEntry: Record<string, any> = {};
-
 			for (const [key, value] of Object.entries(entry)) {
-				newEntry[`${curDatasetID}_${key}`] = value;
+				if (!columns.includes(key)) {
+					newEntry[`${curDatasetID}_${key}`] = value;
+				} else {
+					newEntry[key] = value;
+				}
 			}
-
 			result.push(newEntry as InsightResult);
 		});
-		const maxNum = 5000;
-
 		if (result.length >= maxNum) {
 			throw new ResultTooLargeError("Too many results");
 		}
 		return result;
 	}
 
-	private sortResults(array: any[], primaryField: string): any[] {
-		return [...array].sort((a: any, b: any) => {
-			if (a[primaryField] < b[primaryField]) {
-				return -1;
-			}
-			if (a[primaryField] > b[primaryField]) {
-				return 1;
-			}
-
-			const fields = Object.keys(a).filter((field) => field !== primaryField);
-
-			for (const field of fields) {
-				if (a[field] < b[field]) {
-					return -1;
-				}
-				if (a[field] > b[field]) {
-					return 1;
-				}
-			}
-
-			return 0;
-		});
-	}
 	// this function takes the OPTIONS.COLUMNS part and strips all the dataset id's from the front
 	private extractFilterColumns(query: any): string[] {
 		const columns = query.OPTIONS.COLUMNS;
-		const apply = query.TRANSFORMATIONS.APPLY;
 		const result: string[] = [];
 		columns.forEach((column: string) => {
 			if (column.includes("_")) {
 				result.push(column.split("_")[1]);
 			}
 		});
-		if (apply.length > 1) {
-			apply.forEach((entry: any) => {
-				const column = Object.entries(entry)[0][1] as any;
-				const field = Object.entries(column)[0][1] as string;
+		if (query.TRANSFORMATIONS !== undefined) {
+			const apply = query.TRANSFORMATIONS.APPLY;
 
-				result.push(field.split("_")[1]);
-			});
+			if (apply.length >= 1) {
+				apply.forEach((entry: any) => {
+					const column = Object.entries(entry)[0][1] as any;
+					const field = Object.entries(column)[0][1] as string;
+
+					result.push(field.split("_")[1]);
+				});
+			}
 		}
 
 		return result;
