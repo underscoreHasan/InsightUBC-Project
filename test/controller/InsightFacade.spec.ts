@@ -431,6 +431,7 @@ describe("InsightFacade", function () {
 
 		//tests for Room
 		// it("should resolve if campus.zip", async function () {
+		// 	this.timeout(10000);
 		// 	try {
 		// 		const result = await facade.addDataset("campus", campus, InsightDatasetKind.Rooms);
 		// 		expect(result).to.deep.equals(["campus"]);

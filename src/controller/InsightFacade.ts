@@ -27,9 +27,8 @@ export default class InsightFacade implements IInsightFacade {
 			await this.datasetHandler.processZip(id, zip, kind);
 			await saveDatasetToDisk(this.datasetHandler.getDataset(id), id, kind);
 		} catch (err) {
-			//TODO: make sure the correct error TYPES are thrown
 			if (err instanceof Error) {
-				// Log the error and re-throw it to inform the caller
+				// highest level error catch block
 				throw new InsightError("Failed to process dataset: " + err.message);
 			} else {
 				throw new InsightError("An unknown error occurred.");
