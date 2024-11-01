@@ -1,0 +1,67 @@
+{
+	"title": "invalid duplicate key in apply",
+	"input": {
+		"WHERE": {
+			"OR": [
+				{
+					"AND": [
+						{
+							"GT": {
+								"sections_avg": 90
+							}
+						},
+						{
+							"IS": {
+								"sections_dept": "adhe"
+							}
+						}
+					]
+				},
+				{
+					"AND": [
+						{
+							"EQ": {
+								"sections_avg": 95
+							}
+						},
+						{
+							"NOT": {
+								"IS": {
+									"sections_dept": "sowk"
+								}
+							}
+						}
+					]
+				}
+			]
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"sections_dept",
+				"sections_avg",
+				"sumAvg"
+			],
+			"ORDER": "sections_avg"
+		},
+		"TRANSFORMATIONS": {
+			"GROUP": [
+				"sections_dept",
+				"sections_avg"
+			],
+			"APPLY": [
+				{
+					"sumAvg": {
+						"SUM": "sections_avg"
+					}
+				},
+				{
+					"sumAvg": {
+						"COUNT": "sections_id"
+					}
+				}
+			]
+		}
+	},
+	"errorExpected": true,
+	"expected": "InsightError"
+}

@@ -1,0 +1,36 @@
+{
+	"title": "test count",
+	"input": {
+		"WHERE": {
+			"IS": {
+				"sections_dept": "adhe"
+			}
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"sections_dept",
+				"count"
+			],
+			"ORDER": "sections_dept"
+		},
+		"TRANSFORMATIONS": {
+			"GROUP": [
+				"sections_dept"
+			],
+			"APPLY": [
+				{
+					"count": {
+						"COUNT": "sections_id"
+					}
+				}
+			]
+		}
+	},
+	"errorExpected": false,
+	"expected": [
+		{
+			"sections_dept": "adhe",
+			"count": 5
+		}
+	]
+}

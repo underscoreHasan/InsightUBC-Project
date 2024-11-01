@@ -1,5 +1,5 @@
 {
-	"title": "query negation",
+	"title": "test order sort",
 	"input": {
 		"WHERE": {
 			"NOT": {
@@ -10,7 +10,10 @@
 		},
 		"OPTIONS": {
 			"COLUMNS": ["sections_dept", "sections_avg"],
-			"ORDER": "sections_avg"
+			"ORDER": {
+				"dir": "UP",
+				"keys": ["sections_avg"]
+			}
 		}
 	},
 	"errorExpected": false,
