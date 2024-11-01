@@ -4,9 +4,15 @@ import Building from "./Building";
 import { InsightError } from "./IInsightFacade";
 import { parse } from "parse5";
 import { Document, Element } from "parse5/dist/tree-adapters/default";
-import http from "http"; // Make sure to install the 'http' package if not already installed.
+import { GeolocationService } from "./HttpClient"; // Import the GeolocationService
 
 export class RoomHandler {
+	private geolocationService: GeolocationService;
+
+	constructor() {
+		this.geolocationService = new GeolocationService();
+	}
+
 	public async extractRooms(zip: JSZip): Promise<Room[]> {
 		let indexContent: string;
 		if (zip.files["index.htm"] && !zip.files["index.htm"].dir) {
@@ -86,8 +92,7 @@ export class RoomHandler {
 		if (buildingTable === null) {
 			throw new InsightError("No building table was found in index.htm");
 		}
-		const buildings = await this.processBuildingTable(buildingTable);
-		return buildings;
+		return await this.processBuildingTable(buildingTable);
 	}
 
 	private async processBuildingTable(buildingTable: Document): Promise<Building[]> {
@@ -167,39 +172,12 @@ export class RoomHandler {
 	private async addBuildingIfValid(currentBuilding: any, buildings: Building[]): Promise<void> {
 		const { fullName, shortName, address, directory } = currentBuilding;
 		if (fullName && shortName && address && directory) {
-			const { lat, lon } = await this.makeGeolocationRequest(address);
+			const { lat, lon } = await this.geolocationService.makeGeolocationRequest(address); // Use the GeolocationService
 			currentBuilding.lat = lat;
 			currentBuilding.lon = lon;
 			const building = new Building(fullName, shortName, address, lat, lon, directory);
 			buildings.push(building);
 		}
-	}
-
-	private async makeGeolocationRequest(address: string): Promise<{ lat: number; lon: number }> {
-		const url = `http://cs310.students.cs.ubc.ca:11316/api/v1/project_team086/${encodeURIComponent(address)}`;
-		const response = await this.httpRequest(url);
-		const data = JSON.parse(response);
-		if (data.error) {
-			throw new InsightError(`Error fetching geolocation for address: ${address}`);
-		}
-		return { lat: data.lat, lon: data.lon };
-	}
-
-	private async httpRequest(url: string): Promise<string> {
-		return new Promise((resolve, reject) => {
-			http.get(url, (response) => {
-				let data = "";
-				response.on("data", (chunk) => {
-					data += chunk;
-				});
-				response.on("end", () => {
-					resolve(data);
-				});
-				response.on("error", (err) => {
-					reject(err);
-				});
-			});
-		});
 	}
 
 	private async processRoomsFile(zip: JSZip, buildings: Building[]): Promise<Room[]> {
