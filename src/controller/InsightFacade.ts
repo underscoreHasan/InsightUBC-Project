@@ -3,7 +3,8 @@ import {
 	InsightDataset,
 	InsightDatasetKind,
 	InsightError,
-	InsightResult, NotFoundError,
+	InsightResult,
+	NotFoundError,
 	ResultTooLargeError,
 } from "./IInsightFacade";
 import { ASTTree, ValidFields } from "./ASTTree";

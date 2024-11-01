@@ -3,10 +3,9 @@ import Dataset from "./Dataset";
 import Section from "./Section";
 import Room from "./Room";
 import Building from "./Building";
-import {InsightDatasetKind, InsightError, NotFoundError} from "./IInsightFacade";
-import {parse} from "parse5";
-import {Document, Element} from "parse5/dist/tree-adapters/default";
-
+import { InsightDatasetKind, InsightError, NotFoundError } from "./IInsightFacade";
+import { parse } from "parse5";
+import { Document, Element } from "parse5/dist/tree-adapters/default";
 
 export class DatasetHandler {
 	private datasetIDs: string[] = [];
@@ -28,7 +27,7 @@ export class DatasetHandler {
 	public validId(id: string): boolean {
 		const regex = new RegExp("^[^_]+$");
 		const rgx = regex.test(id);
-		const trim = id.trim().length !== 0
+		const trim = id.trim().length !== 0;
 		const includes = !this.datasetIDs.includes(id);
 		return rgx && trim && includes;
 		//return regex.test(id) && id.trim().length !== 0 && !this.datasetIDs.includes(id);
@@ -38,7 +37,9 @@ export class DatasetHandler {
 		try {
 			return await JSZip.loadAsync(content, { base64: true });
 		} catch (err) {
-			throw new InsightError("JSZip threw error: " + (err instanceof Error ? err.message : "An unknown error occurred."));
+			throw new InsightError(
+				"JSZip threw error: " + (err instanceof Error ? err.message : "An unknown error occurred.")
+			);
 		}
 	}
 
@@ -58,7 +59,6 @@ export class DatasetHandler {
 		} else {
 			throw new InsightError("Invalid kind!");
 		}
-
 	}
 
 	// sections stuff
@@ -150,7 +150,7 @@ export class DatasetHandler {
 		const allTables = this.findAllTables(parsedHTML);
 		const buildingTable = this.findMainTable(allTables);
 		if (buildingTable === null) {
-			throw new InsightError("No building table was found in index.htm")
+			throw new InsightError("No building table was found in index.htm");
 		}
 		return this.extractBuildingInfo(buildingTable);
 	}
@@ -169,7 +169,7 @@ export class DatasetHandler {
 		}
 
 		if (!zip.folder("campus/discover/buildings-and-classrooms")) {
-			throw new InsightError("Error accessing ./campus/discover/buildings-and-classrooms directory")
+			throw new InsightError("Error accessing ./campus/discover/buildings-and-classrooms directory");
 		}
 		const buildings = await this.extractBuildings(indexContent);
 
@@ -190,7 +190,7 @@ export class DatasetHandler {
 		// 	console.log(`  Href: ${room.getHref()}`);
 		// }
 		if (roomResults.flat().length === 0) {
-			throw new InsightError("No valid rooms")
+			throw new InsightError("No valid rooms");
 		} else {
 			return roomResults.flat();
 		}
@@ -199,12 +199,12 @@ export class DatasetHandler {
 	private findAllTables(parsedHTML: Document): Document[] {
 		const tables: Document[] = [];
 
-		function recursiveSearch(node: Document) : void {
-			if (node.nodeName.toString() === 'table') {
+		function recursiveSearch(node: Document): void {
+			if (node.nodeName.toString() === "table") {
 				tables.push(node);
 			}
 
-			if ('childNodes' in node) {
+			if ("childNodes" in node) {
 				for (const child of node.childNodes) {
 					recursiveSearch(child as any as Document);
 				}
@@ -225,7 +225,10 @@ export class DatasetHandler {
 	}
 
 	private containsViewsTableClass(node: Element): boolean {
-		if (node.tagName === 'td' && node.attrs?.some(attr => attr.name === 'class' && attr.value.includes('views-field'))) {
+		if (
+			node.tagName === "td" &&
+			node.attrs?.some((attr) => attr.name === "class" && attr.value.includes("views-field"))
+		) {
 			return true;
 		}
 
@@ -242,29 +245,9 @@ export class DatasetHandler {
 	private extractBuildingInfo(buildingTable: Document): Building[] {
 		const buildings: Building[] = [];
 
-		// Helper function to traverse the DOM
-		const traverseAndExtract = (node: any, currentBuilding: any): any => {
-			if (node.tagName === 'td') {
-				const classAttr = node.attrs?.find((attr: { name: string }) => attr.name === 'class');
-				if (classAttr) {
-					if (classAttr.value.includes('views-field-title')) {
-						const anchor = node.childNodes?.find((child: { nodeName: string }) => child.nodeName === 'a') as Element;
-						if (anchor) {
-							const hrefAttr = anchor.attrs?.find(attr => attr.name === 'href');
-							if (hrefAttr) {
-								currentBuilding.directory = hrefAttr.value;
-								if (anchor.childNodes && anchor.childNodes.length > 0) {
-									const titleTextNode = anchor.childNodes[0] as Text;
-									currentBuilding.fullName = String(titleTextNode["value" as keyof Object]).trim();
-								}
-							}
-						}
-					} else if (classAttr.value.includes('views-field-field-building-code')) {
-						currentBuilding.shortName = node.childNodes?.[0]?.value?.trim() || "";
-					} else if (classAttr.value.includes('views-field-field-building-address')) {
-						currentBuilding.address = node.childNodes?.[0]?.value?.trim() || "";
-					}
-				}
+		const traverseAndExtract = (node: any, currentBuilding: any): void => {
+			if (node.tagName === "td") {
+				this.extractBuildingAttributes(node, currentBuilding);
 			}
 			if (node.childNodes) {
 				for (const child of node.childNodes) {
@@ -275,22 +258,9 @@ export class DatasetHandler {
 
 		const traverseRows = (node: any): void => {
 			if (node.tagName === "tr") {
-				const currentBuilding: any = {
-					fullName: "",
-					shortName: "",
-					address: "",
-					directory: "",
-					lat: 0,
-					lon: 0
-				};
-
+				const currentBuilding: any = this.initializeEmptyBuilding();
 				traverseAndExtract(node, currentBuilding);
-
-				const { fullName, shortName, address, directory } = currentBuilding;
-				if (fullName && shortName && address && directory) {
-					const building = new Building(fullName, shortName, address, 0, 0, directory);
-					buildings.push(building);
-				}
+				this.addBuildingIfValid(currentBuilding, buildings);
 			}
 			if (node.childNodes) {
 				for (const child of node.childNodes) {
@@ -306,6 +276,48 @@ export class DatasetHandler {
 		}
 
 		return buildings;
+	}
+
+	private extractBuildingAttributes(node: any, currentBuilding: any): void {
+		const classAttr = node.attrs?.find((attr: { name: string }) => attr.name === "class");
+		if (classAttr) {
+			if (classAttr.value.includes("views-field-title")) {
+				const anchor = node.childNodes?.find((child: { nodeName: string }) => child.nodeName === "a") as Element;
+				if (anchor) {
+					const hrefAttr = anchor.attrs?.find((attr) => attr.name === "href");
+					if (hrefAttr) {
+						currentBuilding.directory = hrefAttr.value;
+						if (anchor.childNodes && anchor.childNodes.length > 0) {
+							const titleTextNode = anchor.childNodes[0] as Text;
+							currentBuilding.fullName = String(titleTextNode["value" as keyof Object]).trim();
+						}
+					}
+				}
+			} else if (classAttr.value.includes("views-field-field-building-code")) {
+				currentBuilding.shortName = node.childNodes?.[0]?.value?.trim() || "";
+			} else if (classAttr.value.includes("views-field-field-building-address")) {
+				currentBuilding.address = node.childNodes?.[0]?.value?.trim() || "";
+			}
+		}
+	}
+
+	private initializeEmptyBuilding(): any {
+		return {
+			fullName: "",
+			shortName: "",
+			address: "",
+			directory: "",
+			lat: 0,
+			lon: 0,
+		};
+	}
+
+	private addBuildingIfValid(currentBuilding: any, buildings: Building[]): void {
+		const { fullName, shortName, address, directory } = currentBuilding;
+		if (fullName && shortName && address && directory) {
+			const building = new Building(fullName, shortName, address, 0, 0, directory);
+			buildings.push(building);
+		}
 	}
 
 	private async processRoomsFile(zip: JSZip, buildings: Building[]): Promise<Room[]> {
@@ -328,119 +340,107 @@ export class DatasetHandler {
 	}
 
 	private extractValidRooms(parsedHTML: any, building: Building): Room[] {
-		// TODO: finish implementation
-		// traverse the roomsTable and along the way validate the data
-		// for every valid room, construct a room object and add it to an array
-		// return an array of all the valid rooms
 		const allTables = this.findAllTables(parsedHTML);
 		const roomsTable = this.findMainTable(allTables);
 		const rooms: Room[] = [];
 
-		// Helper function to traverse the DOM
-		const traverseAndExtract = (node: any, currentRoom: any): any => {
-			if (node.tagName === 'td') {
-				const classAttr = node.attrs?.find((attr: { name: string }) => attr.name === 'class');
-				if (classAttr) {
-					if (classAttr.value.includes('views-field-field-room-number')) {
-						const anchor = node.childNodes?.find((child: { nodeName: string }) => child.nodeName === 'a') as Element;
-						if (anchor) {
-							const hrefAttr = anchor.attrs?.find(attr => attr.name === 'href');
-							if (hrefAttr) {
-								currentRoom.href = hrefAttr.value;
-								if (anchor.childNodes && anchor.childNodes.length > 0) {
-									const roomNumberTextNode = anchor.childNodes[0] as Text;
-									currentRoom.number = String(roomNumberTextNode["value" as keyof Object]).trim();
-								}
-							}
-						}
-					} else if (classAttr.value.includes('views-field-field-room-capacity')) {
-						currentRoom.seats = Number(node.childNodes?.[0]?.value?.trim() || 0);
-					} else if (classAttr.value.includes('views-field-field-room-furniture')) {
-						currentRoom.furniture = node.childNodes?.[0]?.value?.trim() || "";
-					} else if (classAttr.value.includes('views-field-field-room-type')) {
-						currentRoom.type = node.childNodes?.[0]?.value?.trim() || "";
-					}
-				}
-			}
-			if (node.childNodes) {
-				for (const child of node.childNodes) {
-					traverseAndExtract(child, currentRoom);
-				}
-			}
-		};
-
-		const traverseRows = (node: any): void => {
-			if (node.tagName === "tr") {
-				const currentRoom: any = {
-					fullName: building.getFullName(),
-					shortName: building.getShortName(),
-					number: "",
-					name: "",
-					address: building.getAddress(),
-					lat: 1,
-					lon: 1,
-					seats: 0,
-					type: "",
-					furniture: "",
-					href: ""
-				};
-
-				traverseAndExtract(node, currentRoom);
-
-				const { fullName, shortName, number,
-					address, lat, lon, seats, type, furniture, href } = currentRoom;
-				if (fullName && shortName && number &&
-					address && lat && lon && seats && type && furniture && href) {
-					const room = new Room(fullName, shortName, number, shortName+"_"+fullName,
-						address, lat, lon, seats, type, furniture, href);
-					rooms.push(room);
-				}
-			}
-			if (node.childNodes) {
-				for (const child of node.childNodes) {
-					traverseRows(child);
-				}
-			}
-		};
-
 		if (roomsTable.childNodes) {
 			for (const child of roomsTable.childNodes) {
-				traverseRows(child);
+				this.traverseRows(child, building, rooms);
 			}
 		}
 
 		return rooms;
 	}
 
-	private createRoomFromJson(room: any): Room | null {
-		if (
-			"fullname" in room &&
-			"shortname" in room &&
-			"number" in room &&
-			"name" in room &&
-			"address" in room &&
-			"lat" in room &&
-			"lon" in room &&
-			"seats" in room &&
-			"type" in room &&
-			"furniture" in room &&
-			"href" in room
-		) {
-			return new Room(
-				room.fullname,
-				room.shortname,
-				room.number,
-				room.name,
-				room.address,
-				room.lat,
-				room.lon,
-				room.seats,
-				room.type,
-				room.furniture,
-				room.href
-			);
+	private traverseRows(node: any, building: Building, rooms: Room[]): void {
+		if (node.tagName === "tr") {
+			const currentRoom = this.initializeRoom(building);
+			this.traverseAndExtract(node, currentRoom);
+			if (this.isRoomValid(currentRoom)) {
+				const room = this.constructRoom(currentRoom);
+				rooms.push(room);
+			}
 		}
-		return null;
+		if (node.childNodes) {
+			for (const child of node.childNodes) {
+				this.traverseRows(child, building, rooms);
+			}
+		}
+	}
+
+	private traverseAndExtract(node: any, currentRoom: any): void {
+		if (node.tagName === "td") {
+			const classAttr = node.attrs?.find((attr: { name: string }) => attr.name === "class");
+			if (classAttr) {
+				this.extractRoomAttributes(node, classAttr.value, currentRoom);
+			}
+		}
+		if (node.childNodes) {
+			for (const child of node.childNodes) {
+				this.traverseAndExtract(child, currentRoom);
+			}
+		}
+	}
+
+	private extractRoomAttributes(node: any, classAttrValue: string, currentRoom: any): void {
+		if (classAttrValue.includes("views-field-field-room-number")) {
+			const anchor = node.childNodes?.find((child: { nodeName: string }) => child.nodeName === "a") as Element;
+			if (anchor) {
+				const hrefAttr = anchor.attrs?.find((attr) => attr.name === "href");
+				if (hrefAttr) {
+					currentRoom.href = hrefAttr.value;
+					if (anchor.childNodes && anchor.childNodes.length > 0) {
+						const roomNumberTextNode = anchor.childNodes[0] as Text;
+						currentRoom.number = String(roomNumberTextNode["value" as keyof Object]).trim();
+					}
+				}
+			}
+		} else if (classAttrValue.includes("views-field-field-room-capacity")) {
+			currentRoom.seats = Number(node.childNodes?.[0]?.value?.trim() || 0);
+		} else if (classAttrValue.includes("views-field-field-room-furniture")) {
+			currentRoom.furniture = node.childNodes?.[0]?.value?.trim() || "";
+		} else if (classAttrValue.includes("views-field-field-room-type")) {
+			currentRoom.type = node.childNodes?.[0]?.value?.trim() || "";
+		}
+	}
+
+	private initializeRoom(building: Building): any {
+		return {
+			fullName: building.getFullName(),
+			shortName: building.getShortName(),
+			number: "",
+			name: "",
+			address: building.getAddress(),
+			lat: 1,
+			lon: 1,
+			seats: 0,
+			type: "",
+			furniture: "",
+			href: "",
+		};
+	}
+
+	private isRoomValid(room: any): boolean {
+		const { fullName, shortName, number, address, lat, lon, seats, type, furniture, href } = room;
+		return !!(fullName && shortName && number && address && lat && lon && seats && type && furniture && href);
+	}
+
+	private constructRoom(room: any): Room {
+		const { fullName, shortName, number, address, lat, lon, seats, type, furniture, href } = room;
+		return new Room(
+			fullName,
+			shortName,
+			number,
+			shortName + "_" + fullName,
+			address,
+			lat,
+			lon,
+			seats,
+			type,
+			furniture,
+			href
+		);
 	}
 
 	private addRoomsDatasetToMemory(id: string, rooms: Room[]): Dataset {

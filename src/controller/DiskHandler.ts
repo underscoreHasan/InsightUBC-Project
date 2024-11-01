@@ -1,10 +1,10 @@
 import path from "path";
 import fs from "fs-extra";
 import Dataset from "./Dataset";
-import {InsightDatasetKind, InsightError} from "./IInsightFacade";
+import { InsightDatasetKind, InsightError } from "./IInsightFacade";
 import Section from "./Section";
 import Room from "./Room";
-import {DATA_DIR} from "./InsightFacade";
+import { DATA_DIR } from "./InsightFacade";
 
 async function getDiskIDs(): Promise<any> {
 	const result: string[] = [];
@@ -101,22 +101,22 @@ export async function loadDatasetFromDisk(this: any, id: string): Promise<Sectio
 					)
 			);
 		} else {
-				return dataset.rooms.map(
-					(room: any) =>
-						new Room(
-							room.fullName,
-							room.shortName,
-							room.number,
-							room.name,
-							room.address,
-							room.lat,
-							room.lon,
-							room.seats,
-							room.type,
-							room.furniture,
-							room.href,
-						)
-				);
+			return dataset.rooms.map(
+				(room: any) =>
+					new Room(
+						room.fullName,
+						room.shortName,
+						room.number,
+						room.name,
+						room.address,
+						room.lat,
+						room.lon,
+						room.seats,
+						room.type,
+						room.furniture,
+						room.href
+					)
+			);
 		}
 	} catch (error) {
 		throw new InsightError(`Error loading dataset from disk: ${error}`);
@@ -145,9 +145,9 @@ export async function saveDatasetToDisk(dataset: Dataset, id: string, kind: Insi
 				fail: section.getFail(),
 				audit: section.getAudit(),
 			})),
-			kind: dataset.getKind()// Ensure only serializable properties are included
+			kind: dataset.getKind(), // Ensure only serializable properties are included
 		};
-    } else {
+	} else {
 		dataToSave = {
 			datasetID: dataset.getDatasetID(),
 			rooms: dataset.getRooms().map((room) => ({
@@ -163,7 +163,7 @@ export async function saveDatasetToDisk(dataset: Dataset, id: string, kind: Insi
 				furniture: String(room.getFurniture()),
 				href: String(room.getHref()),
 			})),
-			kind: dataset.getKind()// Ensure only serializable properties are included
+			kind: dataset.getKind(), // Ensure only serializable properties are included
 		};
 	}
 

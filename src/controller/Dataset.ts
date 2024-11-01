@@ -1,12 +1,12 @@
 import Section from "./Section";
 import Room from "./Room";
-import {InsightDatasetKind} from "./IInsightFacade";
+import { InsightDatasetKind } from "./IInsightFacade";
 
 export default class Dataset {
 	private datasetID: string;
 	private sections: Section[] = [];
 	private rooms: Room[] = [];
-	private kind: InsightDatasetKind
+	private kind: InsightDatasetKind;
 
 	constructor(datasetID: string, datasetKind: InsightDatasetKind) {
 		this.datasetID = datasetID;

@@ -6,20 +6,13 @@ export default class Building {
 	private readonly lon: number;
 	private readonly directory: string;
 
-	constructor(
-		fullName: string,
-		shortName: string,
-		address: string,
-		lat: number,
-		lon: number,
-		directory: string
-	) {
+	constructor(fullName: string, shortName: string, address: string, lat: number, lon: number, directory: string) {
 		this.fullName = fullName;
 		this.shortName = shortName;
 		this.address = address;
 		this.lat = lat;
 		this.lon = lon;
-		this.directory = directory.slice(directory.indexOf('/') + 1);
+		this.directory = directory.slice(directory.indexOf("/") + 1);
 	}
 
 	public getFullName(): string {

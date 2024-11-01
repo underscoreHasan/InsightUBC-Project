@@ -83,8 +83,8 @@ describe("InsightFacade", function () {
 		indexTableMissing = await getContentFromArchives("/rooms/indexTableMissing.zip");
 		indexNoTDElements = await getContentFromArchives("/rooms/indexNoTDElements.zip");
 		indexPointsToDirectory = await getContentFromArchives("/rooms/indexPointsToDirectory.zip");
-		emptyRoomsFile = await getContentFromArchives("/rooms/emptyRoomsFile.zip")
-		nonIntuitiveButValid = await getContentFromArchives(("/rooms/nonIntuitiveButValid.zip"))
+		emptyRoomsFile = await getContentFromArchives("/rooms/emptyRoomsFile.zip");
+		nonIntuitiveButValid = await getContentFromArchives("/rooms/nonIntuitiveButValid.zip");
 		// Just in case there is anything hanging around from a previous run of the test suite
 		await clearDisk();
 	});
@@ -418,7 +418,11 @@ describe("InsightFacade", function () {
 			}
 
 			try {
-				const result = await facade.addDataset("oneCourseOneInvalidSection", oneCourseOneInvalidSection, InsightDatasetKind.Sections);
+				const result = await facade.addDataset(
+					"oneCourseOneInvalidSection",
+					oneCourseOneInvalidSection,
+					InsightDatasetKind.Sections
+				);
 				expect(result).to.deep.equals(["oneCourse", "oneCourseOneInvalidSection"]);
 			} catch {
 				expect.fail("Should not have thrown after 2 additions!");
@@ -568,7 +572,6 @@ describe("InsightFacade", function () {
 				await facade.addDataset("data", oneCourse, InsightDatasetKind.Sections);
 			} catch {
 				return expect.fail("Shouldnt get here");
-
 			}
 			const facade2 = new InsightFacade();
 			try {
@@ -934,7 +937,6 @@ describe("InsightFacade", function () {
 			kind: InsightDatasetKind.Rooms,
 			numRows: 6,
 		};
-
 
 		beforeEach(function () {
 			facade = new InsightFacade();
