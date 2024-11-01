@@ -92,7 +92,6 @@ export default class InsightFacade implements IInsightFacade {
 			return sections; // Return all if no filters are applied
 		}
 		const createdASTTree = new ASTTree(queryParams, curDatasetID);
-		// createdASTTree.printTree();
 		return sections.filter((section: any) => {
 			return createdASTTree.evaluate(section);
 		});
@@ -107,12 +106,10 @@ export default class InsightFacade implements IInsightFacade {
 			});
 			return result;
 		});
-
 		let transformedResults = columnFiltered;
 		if (query.TRANSFORMATIONS) {
 			transformedResults = transformResults(transformedResults, query);
 		}
-
 		let sortedResult = transformedResults;
 		if (query.OPTIONS.ORDER) {
 			const order = query.OPTIONS.ORDER;
@@ -127,7 +124,6 @@ export default class InsightFacade implements IInsightFacade {
 				throw new InsightError("Invalid ORDER format in OPTIONS");
 			}
 		}
-
 		return this.constructFinalResult(sortedResult, curDatasetID, query);
 	}
 
