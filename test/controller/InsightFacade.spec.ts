@@ -73,18 +73,18 @@ describe("InsightFacade", function () {
 		oneCourseOneInvalidSection = await getContentFromArchives("oneCourseOneInvalidSection.zip");
 
 		// This block runs once and loads the rooms datasets.
-		campus = await getContentFromArchives("rooms/campus.zip");
-		campusIndexNoCampusFolder = await getContentFromArchives("rooms/campusIndexNoCampusFolder.zip");
-		campusNoIndexNoCampusFolder = await getContentFromArchives("rooms/campusNoIndexNoCampusFolder.zip");
-		campusNoIndexCampusFolder = await getContentFromArchives("rooms/campusNoIndexCampusFolder.zip");
-		CHEMOnly = await getContentFromArchives("rooms/CHEMOnly.zip");
-		CHEMOnlyCHEMhtmdeleted = await getContentFromArchives("rooms/CHEMOnlyCHEMhtmdeleted.zip");
-		indexTbodyMissing = await getContentFromArchives("rooms/indexTbodyMissing.zip");
-		indexTableMissing = await getContentFromArchives("rooms/indexTableMissing.zip");
-		indexNoTDElements = await getContentFromArchives("rooms/indexNoTDElements.zip");
-		indexPointsToDirectory = await getContentFromArchives("rooms/indexPointsToDirectory.zip");
-		emptyRoomsFile = await getContentFromArchives("rooms/emptyRoomsFile.zip");
-		nonIntuitiveButValid = await getContentFromArchives("rooms/nonIntuitiveButValid.zip");
+		campus = await getContentFromArchives("campus.zip");
+		campusIndexNoCampusFolder = await getContentFromArchives("campusIndexNoCampusFolder.zip");
+		campusNoIndexNoCampusFolder = await getContentFromArchives("campusNoIndexNoCampusFolder.zip");
+		campusNoIndexCampusFolder = await getContentFromArchives("campusNoIndexCampusFolder.zip");
+		CHEMOnly = await getContentFromArchives("CHEMOnly.zip");
+		CHEMOnlyCHEMhtmdeleted = await getContentFromArchives("CHEMOnlyCHEMhtmdeleted.zip");
+		indexTbodyMissing = await getContentFromArchives("indexTbodyMissing.zip");
+		indexTableMissing = await getContentFromArchives("indexTableMissing.zip");
+		indexNoTDElements = await getContentFromArchives("indexNoTDElements.zip");
+		indexPointsToDirectory = await getContentFromArchives("indexPointsToDirectory.zip");
+		emptyRoomsFile = await getContentFromArchives("emptyRoomsFile.zip");
+		nonIntuitiveButValid = await getContentFromArchives("nonIntuitiveButValid.zip");
 		// Just in case there is anything hanging around from a previous run of the test suite
 		await clearDisk();
 	});
