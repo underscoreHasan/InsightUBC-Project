@@ -3,7 +3,7 @@ import Room from "./Room";
 import Building from "./Building";
 import { InsightError } from "./IInsightFacade";
 import { parse } from "parse5";
-import { Document, Element } from "parse5/dist/tree-adapters/default";
+import { Document, Element, TextNode } from "parse5/dist/tree-adapters/default";
 import { GeolocationService } from "./HttpClient"; // Import the GeolocationService
 
 export class RoomHandler {
@@ -145,7 +145,7 @@ export class RoomHandler {
 					if (hrefAttr) {
 						currentBuilding.directory = hrefAttr.value;
 						if (anchor.childNodes && anchor.childNodes.length > 0) {
-							const titleTextNode = anchor.childNodes[0] as Text;
+							const titleTextNode = anchor.childNodes[0] as TextNode;
 							currentBuilding.fullName = String(titleTextNode["value" as keyof Object]).trim();
 						}
 					}
@@ -249,7 +249,7 @@ export class RoomHandler {
 				if (hrefAttr) {
 					currentRoom.href = hrefAttr.value;
 					if (anchor.childNodes && anchor.childNodes.length > 0) {
-						const roomNumberTextNode = anchor.childNodes[0] as Text;
+						const roomNumberTextNode = anchor.childNodes[0] as TextNode;
 						currentRoom.number = String(roomNumberTextNode["value" as keyof Object]).trim();
 					}
 				}
