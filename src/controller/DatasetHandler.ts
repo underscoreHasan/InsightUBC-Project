@@ -2,6 +2,7 @@ import JSZip from "jszip";
 import Dataset from "./Dataset";
 import Section from "./Section";
 import Room from "./Room";
+import Building from "./Building";
 import {InsightDatasetKind, InsightError, NotFoundError} from "./IInsightFacade";
 import {parse} from "parse5";
 import { Document, Element } from "parse5/dist/tree-adapters/default";
@@ -10,6 +11,11 @@ import { Document, Element } from "parse5/dist/tree-adapters/default";
 export class DatasetHandler {
 	private datasetIDs: string[] = [];
 	private datasets: Dataset[] = [];
+
+	public getDataset(id: string): Dataset {
+		const index = this.datasetIDs.indexOf(id);
+		return this.datasets[index];
+	}
 
 	public getDatasetIDs(): string[] {
 		return this.datasetIDs;
@@ -56,11 +62,7 @@ export class DatasetHandler {
 
 	}
 
-	public getDataset(id: string): Dataset {
-		const index = this.datasetIDs.indexOf(id);
-		return this.datasets[index];
-	}
-
+	// sections stuff
 	// Extract sections from zip file
 	private async extractSections(zip: JSZip): Promise<Section[]> {
 		const fileNames = Object.keys(zip.files).filter(
@@ -69,31 +71,6 @@ export class DatasetHandler {
 		const sectionPromises = fileNames.map(async (fileName) => this.processSectionsFile(zip, fileName));
 		const sectionResults = await Promise.all(sectionPromises);
 		return sectionResults.flat();
-	}
-
-	// Extract rooms from zip file
-	// private async extractRooms(zip: JSZip): Promise<Room[]> {
-	private async extractRooms(zip: JSZip): Promise<void> {
-		//TODO: finish implementation
-		//find index.htm
-		//call a method to read the table in index.htm: returns array of the filepaths needed or throws an error if something wrong with index.htm
-		//pass array to another method to read each file amnd extract room info from that table
-		//validate room info
-		let indexContent;
-		if (zip.files["index.htm"] && !zip.files["index.htm"].dir) {
-			try {
-				indexContent = await zip.files["index.htm"].async("text");
-			} catch {
-				throw new InsightError("Error reading file index.htm");
-			}
-		} else {
-			throw new InsightError("index.htm not found");
-		}
-		const buildings = await this.extractBuildingsFromIndex(indexContent);
-
-		for (const b of buildings) {
-			console.log(b);
-		}
 	}
 
 	private async processSectionsFile(zip: JSZip, fileName: string): Promise<Section[]> {
@@ -107,127 +84,11 @@ export class DatasetHandler {
 		}
 	}
 
-	private async extractBuildingsFromIndex(indexContent: string): Promise<string[]> {
-		// parse the html
-		// find all the tables
-		// find the building table (can be identified if any one <td> element with classes 'views-field' and 'views-field-field-building-address' is found)
-		// traverse the building table and along the way extract the value in the address column for every building's row in the table
-		// return a string array of all the addresses
-		let parsedHTML;
-		try {
-			parsedHTML = parse(indexContent);
-		} catch {
-			throw new InsightError("Error parsing HTML content");
-		}
-		const allTables = this.findAllTables(parsedHTML);
-		const buildingTable = this.findBuildingTable(allTables);
-		return this.extractBuildingFilePaths(buildingTable);
-	}
-
-	private findAllTables(parsedHTML: Document): Document[] {
-		const tables: Document[] = [];
-
-		function recursiveSearch(node: Document) : void {
-			if (node.nodeName.toString() === 'table') {
-				tables.push(node);
-			}
-
-			if ('childNodes' in node) {
-				for (const child of node.childNodes) {
-					recursiveSearch(child as any as Document);
-				}
-			}
-		}
-
-		recursiveSearch(parsedHTML);
-		return tables;
-	}
-
-	private findBuildingTable(allTables: any[]): any | null {
-		for (const table of allTables) {
-			if (this.containsViewsTableClass(table)) {
-				return table;
-			}
-		}
-		return null;
-	}
-
-	private containsViewsTableClass(node: Element): boolean {
-		if (node.tagName === 'td' && node.attrs?.some(attr => attr.name === 'class' && attr.value.includes('views-field'))) {
-			return true;
-		}
-
-		if (node.childNodes) {
-			for (const child of node.childNodes) {
-				if (this.containsViewsTableClass(child as Element)) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	private extractBuildingFilePaths(buildingTable: Document): string[] {
-		const filePaths: string[] = [];
-
-		// Helper function to traverse the DOM
-		const traverseAndExtract = (node: any): void => {
-			// Check if node is a 'td' element with classes 'views-field' and 'views-field-title'
-			if (node.tagName === 'td' && node.attrs?.some((attr: { value: string | string[]; }) => attr.value.includes('views-field-title'))) {
-				// Find the 'a' child element
-				const anchor = node.childNodes?.find((child: { nodeName: string; }) => child.nodeName === 'a') as Element;
-
-				if (anchor) {
-					const hrefAttr = anchor.attrs?.find(attr => attr.name === 'href');
-					if (hrefAttr) {
-						filePaths.push(hrefAttr.value);
-					}
-				}
-			}
-
-			if (node.childNodes) {
-				for (const child of node.childNodes) {
-					traverseAndExtract(child);
-				}
-			}
-		};
-
-		if (buildingTable.childNodes) {
-			for (const child of buildingTable.childNodes) {
-				traverseAndExtract(child);
-			}
-		}
-
-		return filePaths;
-	}
-
-	private async processRoomsFile(zip: JSZip, fileName: string): Promise<Room[]> {
-		//TODO: finish implementation
-		const file = zip.files[fileName];
-		try {
-			const fileContent = await file.async("text");
-			const parsedJSON = JSON.parse(fileContent);
-			return this.extractValidRooms(parsedJSON);
-		} catch {
-			throw new InsightError(`Error processing file ${fileName}`);
-		}
-	}
-
 	private extractValidSections(parsedJSON: any): Section[] {
 		if (parsedJSON && Array.isArray(parsedJSON.result)) {
 			return parsedJSON.result
 				.map((section: any) => this.createSectionFromJson(section))
 				.filter((section: Section | null) => section !== null) as Section[];
-		}
-		return [];
-	}
-
-	private extractValidRooms(parsedHTML: any): Room[] {
-		//TODO: finish implementation
-		if (parsedHTML && Array.isArray(parsedHTML.result)) {
-			return parsedHTML.result
-				.map((room: any) => this.createRoomFromJson(room))
-				.filter((room: Room | null) => room !== null) as Room[];
 		}
 		return [];
 	}
@@ -263,6 +124,293 @@ export class DatasetHandler {
 		return null;
 	}
 
+	private addSectionsDatasetToMemory(id: string, sections: Section[]): Dataset {
+		const currentDataset = new Dataset(id);
+		for (const section of sections) {
+			currentDataset.addSection(section);
+		}
+		this.datasetIDs.push(id);
+		this.datasets.push(currentDataset);
+		return currentDataset;
+	}
+
+	// rooms stuff
+	// Extract rooms from zip file
+	private async extractBuildings(indexContent: string): Promise<Building[]> {
+		// parse the html
+		// find all the tables
+		// find the building table (can be identified if any one <td> element with classes 'views-field' and 'views-field-field-building-address' is found)
+		// traverse the building table and along the way extract the value of fullName, shortName, address, lat, lon, directory for every building's row in the table
+		// return a string array of all the addresses
+		let parsedHTML;
+		try {
+			parsedHTML = parse(indexContent);
+		} catch {
+			throw new InsightError("Error parsing HTML content");
+		}
+		const allTables = this.findAllTables(parsedHTML);
+		const buildingTable = this.findMainTable(allTables);
+		if (buildingTable === null) {
+			throw new InsightError("No building table was found in index.htm")
+		}
+		return this.extractBuildingInfo(buildingTable);
+	}
+
+	private async extractRooms(zip: JSZip): Promise<Room[]> {
+		let indexContent;
+
+		if (zip.files["index.htm"] && !zip.files["index.htm"].dir) {
+			try {
+				indexContent = await zip.files["index.htm"].async("text");
+			} catch {
+				throw new InsightError("Error reading file index.htm");
+			}
+		} else {
+			throw new InsightError("index.htm not found");
+		}
+
+		if (!zip.folder("campus/discover/buildings-and-classrooms")) {
+			throw new InsightError("Error accessing ./campus/discover/buildings-and-classrooms directory")
+		}
+		const buildings = await this.extractBuildings(indexContent);
+
+		const roomResults = await this.processRoomsFile(zip, buildings);
+
+		// for (const room of roomResults) {
+		// 	console.log('Room Details:');
+		// 	console.log(`  Full Name: ${room.getFullName()}`);
+		// 	console.log(`  Short Name: ${room.getShortName()}`);
+		// 	console.log(`  Number: ${room.getNumber()}`);
+		// 	console.log(`  Name: ${room.getName()}`);
+		// 	console.log(`  Address: ${room.getAddress()}`);
+		// 	console.log(`  Latitude: ${room.getLat()}`);
+		// 	console.log(`  Longitude: ${room.getLon()}`);
+		// 	console.log(`  Seats: ${room.getSeats()}`);
+		// 	console.log(`  Type: ${room.getType()}`);
+		// 	console.log(`  Furniture: ${room.getFurniture()}`);
+		// 	console.log(`  Href: ${room.getHref()}`);
+		// }
+		if (roomResults.flat.length === 0) {
+			throw new InsightError("No valid rooms")
+		} else {
+			return roomResults.flat();
+		}
+	}
+
+	private findAllTables(parsedHTML: Document): Document[] {
+		const tables: Document[] = [];
+
+		function recursiveSearch(node: Document) : void {
+			if (node.nodeName.toString() === 'table') {
+				tables.push(node);
+			}
+
+			if ('childNodes' in node) {
+				for (const child of node.childNodes) {
+					recursiveSearch(child as any as Document);
+				}
+			}
+		}
+
+		recursiveSearch(parsedHTML);
+		return tables;
+	}
+
+	private findMainTable(allTables: any[]): any | null {
+		for (const table of allTables) {
+			if (this.containsViewsTableClass(table)) {
+				return table;
+			}
+		}
+		return null;
+	}
+
+	private containsViewsTableClass(node: Element): boolean {
+		if (node.tagName === 'td' && node.attrs?.some(attr => attr.name === 'class' && attr.value.includes('views-field'))) {
+			return true;
+		}
+
+		if (node.childNodes) {
+			for (const child of node.childNodes) {
+				if (this.containsViewsTableClass(child as Element)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	private extractBuildingInfo(buildingTable: Document): Building[] {
+		const buildings: Building[] = [];
+
+		// Helper function to traverse the DOM
+		const traverseAndExtract = (node: any, currentBuilding: any): any => {
+			if (node.tagName === 'td') {
+				const classAttr = node.attrs?.find((attr: { name: string }) => attr.name === 'class');
+				if (classAttr) {
+					if (classAttr.value.includes('views-field-title')) {
+						const anchor = node.childNodes?.find((child: { nodeName: string }) => child.nodeName === 'a') as Element;
+						if (anchor) {
+							const hrefAttr = anchor.attrs?.find(attr => attr.name === 'href');
+							if (hrefAttr) {
+								currentBuilding.directory = hrefAttr.value;
+								if (anchor.childNodes && anchor.childNodes.length > 0) {
+									const titleTextNode = anchor.childNodes[0] as Text;
+									currentBuilding.fullName = String(titleTextNode["value" as keyof Object]).trim();
+								}
+							}
+						}
+					} else if (classAttr.value.includes('views-field-field-building-code')) {
+						currentBuilding.shortName = node.childNodes?.[0]?.value?.trim() || "";
+					} else if (classAttr.value.includes('views-field-field-building-address')) {
+						currentBuilding.address = node.childNodes?.[0]?.value?.trim() || "";
+					}
+				}
+			}
+			if (node.childNodes) {
+				for (const child of node.childNodes) {
+					traverseAndExtract(child, currentBuilding);
+				}
+			}
+		};
+
+		const traverseRows = (node: any): void => {
+			if (node.tagName === "tr") {
+				const currentBuilding: any = {
+					fullName: "",
+					shortName: "",
+					address: "",
+					directory: "",
+					lat: 0,
+					lon: 0
+				};
+
+				traverseAndExtract(node, currentBuilding);
+
+				const { fullName, shortName, address, directory } = currentBuilding;
+				if (fullName && shortName && address && directory) {
+					const building = new Building(fullName, shortName, address, 0, 0, directory);
+					buildings.push(building);
+				}
+			}
+			if (node.childNodes) {
+				for (const child of node.childNodes) {
+					traverseRows(child);
+				}
+			}
+		};
+
+		if (buildingTable.childNodes) {
+			for (const child of buildingTable.childNodes) {
+				traverseRows(child);
+			}
+		}
+
+		return buildings;
+	}
+
+	private async processRoomsFile(zip: JSZip, buildings: Building[]): Promise<Room[]> {
+		let rooms: Room[] = [];
+		for (const building of buildings) {
+			const filePath = building.getDirectory();
+			if (zip.files[filePath] && !zip.files[filePath].dir) {
+				try {
+					const fileContent = await zip.files[filePath].async("text");
+					const parsedHTML = parse(fileContent);
+					rooms = rooms.concat(this.extractValidRooms(parsedHTML, building));
+				} catch {
+					continue;
+				}
+			}
+		}
+		return rooms;
+	}
+
+	private extractValidRooms(parsedHTML: any, building: Building): Room[] {
+		// TODO: finish implementation
+		// traverse the roomsTable and along the way validate the data
+		// for every valid room, construct a room object and add it to an array
+		// return an array of all the valid rooms
+		const allTables = this.findAllTables(parsedHTML);
+		const roomsTable = this.findMainTable(allTables);
+		const rooms: Room[] = [];
+
+		// Helper function to traverse the DOM
+		const traverseAndExtract = (node: any, currentRoom: any): any => {
+			if (node.tagName === 'td') {
+				const classAttr = node.attrs?.find((attr: { name: string }) => attr.name === 'class');
+				if (classAttr) {
+					if (classAttr.value.includes('views-field-field-room-number')) {
+						const anchor = node.childNodes?.find((child: { nodeName: string }) => child.nodeName === 'a') as Element;
+						if (anchor) {
+							const hrefAttr = anchor.attrs?.find(attr => attr.name === 'href');
+							if (hrefAttr) {
+								currentRoom.href = hrefAttr.value;
+								if (anchor.childNodes && anchor.childNodes.length > 0) {
+									const roomNumberTextNode = anchor.childNodes[0] as Text;
+									currentRoom.number = String(roomNumberTextNode["value" as keyof Object]).trim();
+								}
+							}
+						}
+					} else if (classAttr.value.includes('views-field-field-room-capacity')) {
+						currentRoom.seats = Number(node.childNodes?.[0]?.value?.trim() || 0);
+					} else if (classAttr.value.includes('views-field-field-room-furniture')) {
+						currentRoom.furniture = node.childNodes?.[0]?.value?.trim() || "";
+					} else if (classAttr.value.includes('views-field-field-room-type')) {
+						currentRoom.type = node.childNodes?.[0]?.value?.trim() || "";
+					}
+				}
+			}
+			if (node.childNodes) {
+				for (const child of node.childNodes) {
+					traverseAndExtract(child, currentRoom);
+				}
+			}
+		};
+
+		const traverseRows = (node: any): void => {
+			if (node.tagName === "tr") {
+				const currentRoom: any = {
+					fullName: building.getFullName(),
+					shortName: building.getShortName(),
+					number: "",
+					name: "",
+					address: building.getAddress(),
+					lat: 1,
+					lon: 1,
+					seats: 0,
+					type: "",
+					furniture: "",
+					href: ""
+				};
+
+				traverseAndExtract(node, currentRoom);
+
+				const { fullName, shortName, number,
+					address, lat, lon, seats, type, furniture, href } = currentRoom;
+				if (fullName && shortName && number &&
+					address && lat && lon && seats && type && furniture && href) {
+					const room = new Room(fullName, shortName, number, shortName+"_"+fullName,
+						address, lat, lon, seats, type, furniture, href);
+					rooms.push(room);
+				}
+			}
+			if (node.childNodes) {
+				for (const child of node.childNodes) {
+					traverseRows(child);
+				}
+			}
+		};
+
+		if (roomsTable.childNodes) {
+			for (const child of roomsTable.childNodes) {
+				traverseRows(child);
+			}
+		}
+
+		return rooms;
+	}
+
 	private createRoomFromJson(room: any): Room | null {
 		if (
 			"fullname" in room &&
@@ -292,16 +440,6 @@ export class DatasetHandler {
 			);
 		}
 		return null;
-	}
-
-	private addSectionsDatasetToMemory(id: string, sections: Section[]): Dataset {
-		const currentDataset = new Dataset(id);
-		for (const section of sections) {
-			currentDataset.addSection(section);
-		}
-		this.datasetIDs.push(id);
-		this.datasets.push(currentDataset);
-		return currentDataset;
 	}
 
 	private addRoomsDatasetToMemory(id: string, rooms: Room[]): Dataset {

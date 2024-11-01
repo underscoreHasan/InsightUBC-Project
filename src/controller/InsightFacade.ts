@@ -28,8 +28,8 @@ export default class InsightFacade implements IInsightFacade {
 		} catch (err) {
 			//TODO: make sure the correct error TYPES are thrown
 			if (err instanceof Error) {
-			// Log the error and re-throw it to inform the caller
-			throw new InsightError("Failed to process dataset: " + err.message);
+				// Log the error and re-throw it to inform the caller
+				throw new InsightError("Failed to process dataset: " + err.message);
 			} else {
 				throw new InsightError("An unknown error occurred.");
 			}

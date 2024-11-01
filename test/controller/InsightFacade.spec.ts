@@ -46,6 +46,14 @@ describe("InsightFacade", function () {
 	let campusIndexNoCampusFolder: string;
 	let campusNoIndexNoCampusFolder: string;
 	let campusNoIndexCampusFolder: string;
+	let CHEMOnly: string;
+	let CHEMOnlyCHEMhtmdeleted: string;
+	let indexTbodyMissing: string;
+	let indexTableMissing: string;
+	let indexNoTDElements: string;
+	let indexPointsToDirectory: string;
+	let emptyRoomsFile: string;
+	let nonIntuitiveButValid: string;
 
 	before(async function () {
 		// This block runs once and loads the sections datasets.
@@ -69,7 +77,14 @@ describe("InsightFacade", function () {
 		campusIndexNoCampusFolder = await getContentFromArchives("/rooms/campusIndexNoCampusFolder.zip");
 		campusNoIndexNoCampusFolder = await getContentFromArchives("/rooms/campusNoIndexNoCampusFolder.zip");
 		campusNoIndexCampusFolder = await getContentFromArchives("/rooms/campusNoIndexCampusFolder.zip");
-
+		CHEMOnly = await getContentFromArchives("/rooms/CHEMOnly.zip");
+		CHEMOnlyCHEMhtmdeleted = await getContentFromArchives("/rooms/CHEMOnlyCHEMhtmdeleted.zip");
+		indexTbodyMissing = await getContentFromArchives("/rooms/indexTbodyMissing.zip");
+		indexTableMissing = await getContentFromArchives("/rooms/indexTableMissing.zip");
+		indexNoTDElements = await getContentFromArchives("/rooms/indexNoTDElements.zip");
+		indexPointsToDirectory = await getContentFromArchives("/rooms/indexPointsToDirectory.zip");
+		emptyRoomsFile = await getContentFromArchives("/rooms/emptyRoomsFile.zip")
+		nonIntuitiveButValid = await getContentFromArchives(("/rooms/nonIntuitiveButValid.zip"))
 		// Just in case there is anything hanging around from a previous run of the test suite
 		await clearDisk();
 	});
@@ -411,7 +426,6 @@ describe("InsightFacade", function () {
 			}
 		});
 
-
 		it("should reject if index.htm present but no campus folder", async function () {
 			try {
 				await facade.addDataset("campusIndexNoCampusFolder", campusIndexNoCampusFolder, InsightDatasetKind.Rooms);
@@ -436,6 +450,78 @@ describe("InsightFacade", function () {
 				expect.fail("Should have thrown!");
 			} catch (err) {
 				expect(err).to.be.instanceOf(InsightError);
+			}
+		});
+
+		it("should resolve if CHEMOnly.zip", async function () {
+			try {
+				const result = facade.addDataset("CHEMOnly", CHEMOnly, InsightDatasetKind.Rooms);
+				expect(result).to.deep.equals(["CHEMOnly"]);
+			} catch {
+				expect.fail("Should not have thrown after addition!");
+			}
+		});
+
+		it("should reject if no valid rooms", async function () {
+			try {
+				await facade.addDataset("CHEMOnlyCHEMhtmdeleted", CHEMOnlyCHEMhtmdeleted, InsightDatasetKind.Rooms);
+				expect.fail("Should have thrown after addition!");
+			} catch (err) {
+				expect(err).to.be.instanceOf(InsightError);
+			}
+		});
+
+		it("should reject if no table body in index", async function () {
+			try {
+				await facade.addDataset("indexTbodyMissing", indexTbodyMissing, InsightDatasetKind.Rooms);
+				expect.fail("Should have thrown after addition!");
+			} catch (err) {
+				expect(err).to.be.instanceOf(InsightError);
+			}
+		});
+
+		it("should reject if no table in index", async function () {
+			try {
+				await facade.addDataset("indexTableMissing", indexTableMissing, InsightDatasetKind.Rooms);
+				expect.fail("Should have thrown after addition!");
+			} catch (err) {
+				expect(err).to.be.instanceOf(InsightError);
+			}
+		});
+
+		it("should reject if no TD elements in index", async function () {
+			try {
+				await facade.addDataset("indexNoTDElements", indexNoTDElements, InsightDatasetKind.Rooms);
+				expect.fail("Should have thrown after addition!");
+			} catch (err) {
+				expect(err).to.be.instanceOf(InsightError);
+			}
+		});
+
+		it("should reject if index points to directory instead of file", async function () {
+			try {
+				await facade.addDataset("indexPointsToDirectory", indexPointsToDirectory, InsightDatasetKind.Rooms);
+				expect.fail("Should have thrown after addition!");
+			} catch (err) {
+				expect(err).to.be.instanceOf(InsightError);
+			}
+		});
+
+		it("should reject if index points to empty rooms file", async function () {
+			try {
+				await facade.addDataset("emptyRoomsFile", emptyRoomsFile, InsightDatasetKind.Rooms);
+				expect.fail("Should have thrown after addition!");
+			} catch (err) {
+				expect(err).to.be.instanceOf(InsightError);
+			}
+		});
+
+		it("should resolve if rooms td elements have non intuitive but valid values", async function () {
+			try {
+				const result = facade.addDataset("nonIntuitiveButValid", nonIntuitiveButValid, InsightDatasetKind.Rooms);
+				expect(result).to.deep.equals(["nonIntuitiveButValid"]);
+			} catch {
+				expect.fail("Should not have thrown after addition!");
 			}
 		});
 	});

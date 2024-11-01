@@ -1,6 +1,6 @@
 export default class Room {
-	private readonly fullname: string;
-	private readonly shortname: string;
+	private readonly fullName: string;
+	private readonly shortName: string;
 	private readonly number: string;
 	private readonly name: string;
 	private readonly address: string;
@@ -12,7 +12,7 @@ export default class Room {
 	private readonly href: string;
 
 	constructor(
-		fullname: string,
+		fullName: string,
 		shortname: string,
 		number: string,
 		name: string,
@@ -24,8 +24,8 @@ export default class Room {
 		furniture: string,
 		href: string
 	) {
-		this.fullname = fullname;
-		this.shortname = shortname;
+		this.fullName = fullName;
+		this.shortName = shortname;
 		this.number = number;
 		this.name = name;
 		this.address = address;
@@ -38,11 +38,11 @@ export default class Room {
 	}
 
 	public getFullName(): string {
-		return this.fullname;
+		return this.fullName;
 	}
 
 	public getShortName(): string {
-		return this.shortname;
+		return this.shortName;
 	}
 
 	public getNumber(): string {
