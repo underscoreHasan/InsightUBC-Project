@@ -4,7 +4,7 @@ import Decimal from "decimal.js";
 
 export const validApplyToken = new Set(["MAX", "MIN", "AVG", "COUNT", "SUM"]);
 
-const numericFields = new Set(["year", "avg", "pass", "fail", "audit", "lat", "lon", "seats"]);
+export const numericFields = new Set(["year", "avg", "pass", "fail", "audit", "lat", "lon", "seats"]);
 export function validateRooms(options: any): string {
 	//iterate through column and validate
 	const columns = options.COLUMNS;
@@ -44,6 +44,9 @@ function validateOrder(columns: any, order: any, applyKeys: Set<string>, dataset
 	} else if (typeof order === "object") {
 		if (order.keys === undefined) {
 			throw new InsightError("No keys in order");
+		}
+		if (order.keys.length === 0) {
+			throw new InsightError("Empty keys");
 		}
 		if (order.dir !== "UP" && order.dir !== "DOWN") {
 			throw new InsightError("ORDER direction must be 'UP' or 'DOWN'");
@@ -187,7 +190,9 @@ function calculateAggregation(token: string, field: string, entries: any[]): any
 			return Math.min(...entries.map((entry: any) => entry[field]));
 		case "AVG": {
 			let total = new Decimal(0);
-			entries.forEach((entry: any) => (total = total.add(entry[field])));
+
+			entries.forEach((entry: any) => (total = total.add(new Decimal(entry[field]))));
+
 			return Number((total.toNumber() / entries.length).toFixed(two));
 		}
 		case "SUM": {

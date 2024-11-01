@@ -985,15 +985,15 @@ describe("InsightFacade", function () {
 			it("[invalid/morethanonedatasetcolumns.json] column has more than one dataset", checkQuery);
 			it("[invalid/invalidgroup.json] invalid group name", checkQuery);
 
-			// it("[valid/rooms.json] default rooms test", checkQuery);
-			// it("[valid/validnokeys.json] no keys in order", checkQuery);
+			it("[valid/rooms.json] default rooms test", checkQuery);
+			it("[valid/validnokeys.json] no keys in order", checkQuery);
 
 			// check ordering
 			// it("[valid/validAvg.json] valid avg and check order", checkQuery);
 			// it("[valid/validCount.json] valid count and check order", checkQuery);
-			// it("[valid/validmax.json] valid max and check order", checkQuery);
-			// it("[valid/validmin.json] valid min and check order", checkQuery);
-			// it("[valid/validsum.json] valid sum and check order", checkQuery);
+			it("[valid/validmax.json] valid max and check order", checkQuery);
+			it("[valid/validmin.json] valid min and check order", checkQuery);
+			it("[valid/validsum.json] valid sum and check order", checkQuery);
 
 			//invalid rooms
 			it("[invalid/invalidKeyTypeForApply.json] invalid key type for apply", checkQuery);

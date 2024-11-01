@@ -1,4 +1,5 @@
 import { InsightError } from "./IInsightFacade";
+import { numericFields } from "./TransformationManipulations";
 
 export const ValidFields = new Set([
 	"uuid",
@@ -133,7 +134,6 @@ export class ASTTree {
 		const treeField = treeQuery[0];
 		const treeValue = treeQuery[1];
 		const treeKey = treeField.split("_")[1];
-
 		switch (operator) {
 			case "IS":
 				return this.isMatchingType(data[treeKey], false) && this.matchesPattern(data[treeKey], treeValue);
@@ -161,7 +161,7 @@ export class ASTTree {
 
 	private checkForTypeEquality(comparisionKey: string, comparisionValue: string | number, operator: string): void {
 		const field = comparisionKey.substring(comparisionKey.indexOf("_") + 1);
-		if (field === "uuid" || field === "id" || field === "title" || field === "instructor" || field === "dept") {
+		if (!numericFields.has(field)) {
 			if (typeof comparisionValue === "number") {
 				throw new InsightError("Mismatched type");
 			}
