@@ -26,7 +26,7 @@ export interface ITestQuery {
 describe("InsightFacade", function () {
 	let facade: IInsightFacade;
 
-	// Declare datasets used in tests. You should add more datasets like this!
+	// Declare sections datasets used in tests.
 	let sections: string;
 	let oneCourse: string;
 	let anotherOneCourse: string;
@@ -39,11 +39,27 @@ describe("InsightFacade", function () {
 	let noSectionsAtAll: string;
 	let notInCoursesFolder: string;
 	let notJSONFormat: string;
+	let noValidSections: string;
+	let oneCourseOneInvalidSection: string;
+
+	// Declare rooms datasets used in tests.
+	let campus: string;
+	let campusIndexNoCampusFolder: string;
+	let campusNoIndexNoCampusFolder: string;
+	let campusNoIndexCampusFolder: string;
+	let CHEMOnly: string;
+	let CHEMOnlyCHEMhtmdeleted: string;
+	let indexTbodyMissing: string;
+	let indexTableMissing: string;
+	let indexNoTDElements: string;
+	let indexPointsToDirectory: string;
+	let emptyRoomsFile: string;
+	let nonIntuitiveButValid: string;
 
 	// let noValidSections: string;
 
 	before(async function () {
-		// This block runs once and loads the datasets.
+		// This block runs once and loads the sections datasets.
 		sections = await getContentFromArchives("pair.zip");
 		oneCourse = await getContentFromArchives("OneCourse.zip");
 		anotherOneCourse = await getContentFromArchives("AnotherOneCourse.zip");
@@ -55,8 +71,23 @@ describe("InsightFacade", function () {
 		notInCoursesFolder = await getContentFromArchives("NotInCoursesFolder.zip");
 		emptyJSON = await getContentFromArchives("emptyJSON.zip");
 		noSectionsAtAll = await getContentFromArchives("noSectionsAtAll.zip");
-		// noValidSections = await getContentFromArchives("NoValidSections.zip");
+		noValidSections = await getContentFromArchives("NoValidSections.zip");
 		notJSONFormat = await getContentFromArchives("notJSONFormat.zip");
+		oneCourseOneInvalidSection = await getContentFromArchives("oneCourseOneInvalidSection.zip");
+
+		// This block runs once and loads the rooms datasets.
+		campus = await getContentFromArchives("campus.zip");
+		campusIndexNoCampusFolder = await getContentFromArchives("campusIndexNoCampusFolder.zip");
+		campusNoIndexNoCampusFolder = await getContentFromArchives("campusNoIndexNoCampusFolder.zip");
+		campusNoIndexCampusFolder = await getContentFromArchives("campusNoIndexCampusFolder.zip");
+		CHEMOnly = await getContentFromArchives("CHEMOnly.zip");
+		CHEMOnlyCHEMhtmdeleted = await getContentFromArchives("CHEMOnlyCHEMhtmdeleted.zip");
+		indexTbodyMissing = await getContentFromArchives("indexTbodyMissing.zip");
+		indexTableMissing = await getContentFromArchives("indexTableMissing.zip");
+		indexNoTDElements = await getContentFromArchives("indexNoTDElements.zip");
+		indexPointsToDirectory = await getContentFromArchives("indexPointsToDirectory.zip");
+		emptyRoomsFile = await getContentFromArchives("emptyRoomsFile.zip");
+		nonIntuitiveButValid = await getContentFromArchives("nonIntuitiveButValid.zip");
 		// campus = await getContentFromArchives("/rooms/campus.zip");
 
 		// Just in case there is anything hanging around from a previous run of the test suite
@@ -91,14 +122,14 @@ describe("InsightFacade", function () {
 		});
 
 		it("should reject with  an empty dataset id", function () {
-			const result = facade.addDataset("", oneCourse, InsightDatasetKind.Sections);
+			const result = facade.addDataset("", sections, InsightDatasetKind.Sections);
 
 			return expect(result).to.eventually.be.rejectedWith(InsightError);
 		});
 
 		it("should reject with an underscore in the id", async () => {
 			try {
-				await facade.addDataset("_test", oneCourse, InsightDatasetKind.Sections);
+				await facade.addDataset("_test", sections, InsightDatasetKind.Sections);
 			} catch (err) {
 				return expect(err).to.be.instanceOf(InsightError);
 			}
@@ -129,7 +160,7 @@ describe("InsightFacade", function () {
 			return expect(result).to.have.members(["data"]);
 		});
 
-		it("should sucessfully add multiple datasets", async () => {
+		it("should successfully add multiple datasets", async () => {
 			let result: string[];
 
 			try {
@@ -144,7 +175,7 @@ describe("InsightFacade", function () {
 		//rejections due to dataset id
 		it("should reject with an empty dataset id", async function () {
 			try {
-				await facade.addDataset("", oneCourse, InsightDatasetKind.Sections);
+				await facade.addDataset("", sections, InsightDatasetKind.Sections);
 				expect.fail("Should have thrown!");
 			} catch (err) {
 				expect(err).to.be.instanceOf(InsightError);
@@ -153,7 +184,7 @@ describe("InsightFacade", function () {
 
 		it("should reject with a whitespace dataset id", async function () {
 			try {
-				await facade.addDataset("   ", oneCourse, InsightDatasetKind.Sections);
+				await facade.addDataset("   ", sections, InsightDatasetKind.Sections);
 				expect.fail("Should have thrown!");
 			} catch (err) {
 				expect(err).to.be.instanceOf(InsightError);
@@ -162,7 +193,7 @@ describe("InsightFacade", function () {
 
 		it("should reject with a _ dataset id", async function () {
 			try {
-				await facade.addDataset("_", oneCourse, InsightDatasetKind.Sections);
+				await facade.addDataset("_", sections, InsightDatasetKind.Sections);
 				expect.fail("Should have thrown!");
 			} catch (err) {
 				expect(err).to.be.instanceOf(InsightError);
@@ -171,7 +202,7 @@ describe("InsightFacade", function () {
 
 		it("should reject with a _dataset id", async function () {
 			try {
-				await facade.addDataset("_dataset", oneCourse, InsightDatasetKind.Sections);
+				await facade.addDataset("_dataset", sections, InsightDatasetKind.Sections);
 				expect.fail("Should have thrown!");
 			} catch (err) {
 				expect(err).to.be.instanceOf(InsightError);
@@ -180,7 +211,7 @@ describe("InsightFacade", function () {
 
 		it("should reject with a dataset_ id", async function () {
 			try {
-				await facade.addDataset("dataset_", oneCourse, InsightDatasetKind.Sections);
+				await facade.addDataset("dataset_", sections, InsightDatasetKind.Sections);
 				expect.fail("Should have thrown!");
 			} catch (err) {
 				expect(err).to.be.instanceOf(InsightError);
@@ -189,16 +220,25 @@ describe("InsightFacade", function () {
 
 		it("should reject with a data_set id", async function () {
 			try {
-				await facade.addDataset("data_set", oneCourse, InsightDatasetKind.Sections);
+				await facade.addDataset("data_set", sections, InsightDatasetKind.Sections);
 				expect.fail("Should have thrown!");
 			} catch (err) {
 				expect(err).to.be.instanceOf(InsightError);
 			}
 		});
 
-		it("should reject with a non-zip file", async function () {
+		it("should reject with a non-zip file for sections", async function () {
 			try {
 				await facade.addDataset("notazip", notGonnaWork, InsightDatasetKind.Sections);
+				expect.fail("Should have thrown!");
+			} catch (err) {
+				expect(err).to.be.instanceOf(InsightError);
+			}
+		});
+
+		it("should reject with a non-zip file for rooms", async function () {
+			try {
+				await facade.addDataset("notazip", notGonnaWork, InsightDatasetKind.Rooms);
 				expect.fail("Should have thrown!");
 			} catch (err) {
 				expect(err).to.be.instanceOf(InsightError);
@@ -214,20 +254,6 @@ describe("InsightFacade", function () {
 			}
 		});
 
-		//A valid dataset:
-		//	Is a structured as a base64 string of a zip file.
-		// 	Contains at least one valid section.
-		// A valid course:
-		// 	Is a JSON formatted file.
-		// 	Contains one or more valid sections.
-		// 		Within a JSON formatted file, valid sections will be found within the "result" key.
-		// 	Is located within a folder called courses/ in the zip's root directory.
-		// A valid section:
-		// 	Contains every field which can be used by a query (see the "Valid Query Keys" section below).
-		// 	If a field you use in a section is present in the JSON but contains something counter-intuitive like empty string, it is still valid.
-
-		//datasets with
-		//only an invalid sections
 		it("should reject due to being only an invalid section", async function () {
 			try {
 				await facade.addDataset("invalidSection", invalidSection, InsightDatasetKind.Sections);
@@ -255,6 +281,15 @@ describe("InsightFacade", function () {
 			}
 		});
 
+		it("should reject when noValidSections", async function () {
+			try {
+				await facade.addDataset("noValidSections", noValidSections, InsightDatasetKind.Sections);
+				expect.fail("Should have thrown!");
+			} catch (err) {
+				expect(err).to.be.instanceOf(InsightError);
+			}
+		});
+
 		it("should reject when not in JSON Format", async function () {
 			try {
 				await facade.addDataset("notJSONFormat", notJSONFormat, InsightDatasetKind.Sections);
@@ -264,12 +299,21 @@ describe("InsightFacade", function () {
 			}
 		});
 
-		// it("should reject when no valid sections", async function () {
+		it("should reject when no valid sections", async function () {
+			try {
+				await facade.addDataset("noValidSections", noValidSections, InsightDatasetKind.Sections);
+				expect.fail("Should have thrown!");
+			} catch (err) {
+				expect(err).to.be.instanceOf(InsightError);
+			}
+		});
+
+		// it("should resolve in time with large pair.zip", async function () {
 		// 	try {
-		// 		await facade.addDataset("noValidSections", noValidSections, InsightDatasetKind.Sections);
-		// 		expect.fail("Should have thrown!");
-		// 	} catch (err) {
-		// 		expect(err).to.be.instanceOf(InsightError);
+		// 		const result = await facade.addDataset("sections", sections, InsightDatasetKind.Sections);
+		// 		expect(result).to.deep.equals(["sections"]);
+		// 	} catch {
+		// 		expect.fail("Should not have thrown after 1 addition!");
 		// 	}
 		// });
 
@@ -287,10 +331,7 @@ describe("InsightFacade", function () {
 			}
 		});
 
-		//several valid and several invalid sections?
-
 		//nothing in the /courses/ folder
-
 		it("should reject with valid id but invalid (empty) dataset", async function () {
 			try {
 				await facade.addDataset("emptyDataset", emptyDataset, InsightDatasetKind.Sections);
@@ -301,7 +342,6 @@ describe("InsightFacade", function () {
 		});
 
 		//tests for successful resolution:
-
 		it("should resolve with valid id and valid dataset", async function () {
 			try {
 				const result = await facade.addDataset("oneCourse", oneCourse, InsightDatasetKind.Sections);
@@ -373,8 +413,156 @@ describe("InsightFacade", function () {
 				expect.fail("Should not have thrown after 3 additions, 1 removal!");
 			}
 		});
-	});
 
+		it("should resolve in time with oneCourse.zip and oneCourseOneInvalidSection.zip", async function () {
+			try {
+				const result = await facade.addDataset("oneCourse", oneCourse, InsightDatasetKind.Sections);
+				expect(result).to.deep.equals(["oneCourse"]);
+			} catch {
+				expect.fail("Should not have thrown after 1 addition!");
+			}
+
+			try {
+				const result = await facade.addDataset(
+					"oneCourseOneInvalidSection",
+					oneCourseOneInvalidSection,
+					InsightDatasetKind.Sections
+				);
+				expect(result).to.deep.equals(["oneCourse", "oneCourseOneInvalidSection"]);
+			} catch {
+				expect.fail("Should not have thrown after 2 additions!");
+			}
+		});
+
+		//tests for Room
+		// it("should resolve if campus.zip", async function () {
+		// 	this.timeout(10000);
+		// 	try {
+		// 		const result = await facade.addDataset("campus", campus, InsightDatasetKind.Rooms);
+		// 		expect(result).to.deep.equals(["campus"]);
+		// 	} catch {
+		// 		expect.fail("Should not have thrown after addition!");
+		// 	}
+		// });
+
+		it("should reject if index.htm present but no campus folder", async function () {
+			try {
+				await facade.addDataset("campusIndexNoCampusFolder", campusIndexNoCampusFolder, InsightDatasetKind.Rooms);
+				expect.fail("Should have thrown!");
+			} catch (err) {
+				expect(err).to.be.instanceOf(InsightError);
+			}
+		});
+
+		it("should reject if no index.htm but campus folder present", async function () {
+			try {
+				await facade.addDataset("campusNoIndexCampusFolder", campusNoIndexCampusFolder, InsightDatasetKind.Rooms);
+				expect.fail("Should have thrown!");
+			} catch (err) {
+				expect(err).to.be.instanceOf(InsightError);
+			}
+		});
+
+		it("should reject if no index.htm and no campus folder", async function () {
+			try {
+				await facade.addDataset("campusNoIndexNoCampusFolder", campusNoIndexNoCampusFolder, InsightDatasetKind.Rooms);
+				expect.fail("Should have thrown!");
+			} catch (err) {
+				expect(err).to.be.instanceOf(InsightError);
+			}
+		});
+
+		it("should resolve if CHEMOnly.zip", async function () {
+			try {
+				const result = await facade.addDataset("CHEMOnly", CHEMOnly, InsightDatasetKind.Rooms);
+				expect(result).to.deep.equals(["CHEMOnly"]);
+			} catch {
+				expect.fail("Should not have thrown after addition!");
+			}
+		});
+
+		it("should reject if no valid rooms", async function () {
+			try {
+				await facade.addDataset("CHEMOnlyCHEMhtmdeleted", CHEMOnlyCHEMhtmdeleted, InsightDatasetKind.Rooms);
+				expect.fail("Should have thrown after addition!");
+			} catch (err) {
+				expect(err).to.be.instanceOf(InsightError);
+			}
+		});
+
+		it("should reject if no table body in index", async function () {
+			try {
+				await facade.addDataset("indexTbodyMissing", indexTbodyMissing, InsightDatasetKind.Rooms);
+				expect.fail("Should have thrown after addition!");
+			} catch (err) {
+				expect(err).to.be.instanceOf(InsightError);
+			}
+		});
+
+		it("should reject if no table in index", async function () {
+			try {
+				await facade.addDataset("indexTableMissing", indexTableMissing, InsightDatasetKind.Rooms);
+				expect.fail("Should have thrown after addition!");
+			} catch (err) {
+				expect(err).to.be.instanceOf(InsightError);
+			}
+		});
+
+		it("should reject if no TD elements in index", async function () {
+			try {
+				await facade.addDataset("indexNoTDElements", indexNoTDElements, InsightDatasetKind.Rooms);
+				expect.fail("Should have thrown after addition!");
+			} catch (err) {
+				expect(err).to.be.instanceOf(InsightError);
+			}
+		});
+
+		it("should reject if index points to directory instead of file", async function () {
+			try {
+				await facade.addDataset("indexPointsToDirectory", indexPointsToDirectory, InsightDatasetKind.Rooms);
+				expect.fail("Should have thrown after addition!");
+			} catch (err) {
+				expect(err).to.be.instanceOf(InsightError);
+			}
+		});
+
+		it("should reject if index points to empty rooms file", async function () {
+			try {
+				await facade.addDataset("emptyRoomsFile", emptyRoomsFile, InsightDatasetKind.Rooms);
+				expect.fail("Should have thrown after addition!");
+			} catch (err) {
+				expect(err).to.be.instanceOf(InsightError);
+			}
+		});
+
+		//TODO: dont think the logic to add non-intuitive values here is working
+		it("should resolve if rooms td elements have non intuitive but valid values", async function () {
+			try {
+				const result = await facade.addDataset("nonIntuitiveButValid", nonIntuitiveButValid, InsightDatasetKind.Rooms);
+				expect(result).to.deep.equals(["nonIntuitiveButValid"]);
+			} catch {
+				expect.fail("Should not have thrown after addition!");
+			}
+		});
+
+		it("should reject if CHEMOnly.zip provided with sections kind", async function () {
+			try {
+				await facade.addDataset("emptyRoomsFile", emptyRoomsFile, InsightDatasetKind.Sections);
+				expect.fail("Should have thrown after addition!");
+			} catch (err) {
+				expect(err).to.be.instanceOf(InsightError);
+			}
+		});
+
+		it("should reject if oneCourse.zip provided with rooms kind", async function () {
+			try {
+				await facade.addDataset("oneCourse", oneCourse, InsightDatasetKind.Rooms);
+				expect.fail("Should have thrown after addition!");
+			} catch (err) {
+				expect(err).to.be.instanceOf(InsightError);
+			}
+		});
+	});
 	describe("removeDataset", function () {
 		beforeEach(function () {
 			facade = new InsightFacade();
@@ -401,13 +589,14 @@ describe("InsightFacade", function () {
 
 		it("should not return if case sensitive", async () => {
 			try {
-				await facade.addDataset("data", oneCourse, InsightDatasetKind.Sections);
+				await facade.addDataset("data", anotherOneCourse, InsightDatasetKind.Sections);
 				await facade.removeDataset("DATA");
 			} catch (error) {
 				return expect(error).to.be.instanceOf(NotFoundError);
 			}
 			return expect.fail("should have caught error");
 		});
+
 		it("should reject if id has underscore", async () => {
 			try {
 				await facade.removeDataset("_");
@@ -454,7 +643,7 @@ describe("InsightFacade", function () {
 
 		it("should delete data correctly", async () => {
 			try {
-				await facade.addDataset("data", oneCourse, InsightDatasetKind.Sections);
+				await facade.addDataset("data", anotherOneCourse, InsightDatasetKind.Sections);
 				await facade.removeDataset("data");
 			} catch {
 				return expect.fail("Shouldnt throw an error");
@@ -613,6 +802,29 @@ describe("InsightFacade", function () {
 				expect.fail("Should not have thrown!");
 			}
 		});
+
+		it("should resolve for removal of rooms", async function () {
+			try {
+				await facade.addDataset("chemOnly", CHEMOnly, InsightDatasetKind.Rooms);
+				const result = await facade.removeDataset("chemOnly");
+				expect(result).to.deep.equals("chemOnly");
+			} catch {
+				expect.fail("Should not have thrown!");
+			}
+		});
+
+		it("should resolve for removal of several rooms", async function () {
+			try {
+				await facade.addDataset("chemOnly", CHEMOnly, InsightDatasetKind.Rooms);
+				await facade.addDataset("campus", campus, InsightDatasetKind.Rooms);
+				const result = await facade.removeDataset("chemOnly");
+				expect(result).to.deep.equals("chemOnly");
+				const result2 = await facade.removeDataset("campus");
+				expect(result2).to.deep.equals("campus");
+			} catch {
+				expect.fail("Should not have thrown!");
+			}
+		});
 	});
 
 	describe("Validate PerformQuery", function () {
@@ -746,52 +958,52 @@ describe("InsightFacade", function () {
 				it("[valid/testCount.json] testing count", checkQuery);
 			});
 		});
-		// describe("Perform query tests for rooms", () => {
-		// 	before(async function () {
-		// 		facade = new InsightFacade();
+		describe("Perform query tests for rooms", () => {
+			before(async function () {
+				facade = new InsightFacade();
 
-		// 		// Add the datasets to InsightFacade once.
-		// 		// Will *fail* if there is a problem reading ANY dataset.
-		// 		const loadDatasetPromises: Promise<string[]>[] = [facade.addDataset("rooms", campus, InsightDatasetKind.Rooms)];
+				// Add the datasets to InsightFacade once.
+				// Will *fail* if there is a problem reading ANY dataset.
+				const loadDatasetPromises: Promise<string[]>[] = [facade.addDataset("rooms", campus, InsightDatasetKind.Rooms)];
 
-		// 		try {
-		// 			await Promise.all(loadDatasetPromises);
-		// 		} catch (err) {
-		// 			throw new Error(`In PerformQuery Before hook, dataset(s) failed to be added. \n${err}`);
-		// 		}
-		// 	});
+				try {
+					await Promise.all(loadDatasetPromises);
+				} catch (err) {
+					throw new Error(`In PerformQuery Before hook, dataset(s) failed to be added. \n${err}`);
+				}
+			});
 
-		// 	after(async function () {
-		// 		await clearDisk();
-		// 	});
+			after(async function () {
+				await clearDisk();
+			});
 
-		// 	// rooms
-		// 	it("[invalid/emptykeys.json] no keys in keys array for order", checkQuery);
-		// 	it("[invalid/invalidkeys.json] invalid keys in key array", checkQuery);
-		// 	it("[invalid/invalidOrderDir.json] invalid directions in order", checkQuery);
-		// 	it("[invalid/missingKeys.json] missing keys in order", checkQuery);
-		// 	it("[invalid/morethanonedatasetcolumns.json] column has more than one dataset", checkQuery);
-		// 	it("[invalid/invalidgroup.json] invalid group name", checkQuery);
+			// rooms
+			it("[invalid/emptykeys.json] no keys in keys array for order", checkQuery);
+			it("[invalid/invalidkeys.json] invalid keys in key array", checkQuery);
+			it("[invalid/invalidOrderDir.json] invalid directions in order", checkQuery);
+			it("[invalid/missingKeys.json] missing keys in order", checkQuery);
+			it("[invalid/morethanonedatasetcolumns.json] column has more than one dataset", checkQuery);
+			it("[invalid/invalidgroup.json] invalid group name", checkQuery);
 
-		// 	it("[valid/rooms.json] default rooms test", checkQuery);
-		// 	it("[valid/validnokeys.json] no keys in order", checkQuery);
+			// it("[valid/rooms.json] default rooms test", checkQuery);
+			// it("[valid/validnokeys.json] no keys in order", checkQuery);
 
-		// 	// check ordering
-		// 	it("[valid/validAvg.json] valid avg and check order", checkQuery);
-		// 	it("[valid/validCount.json] valid count and check order", checkQuery);
-		// 	it("[valid/validmax.json] valid max and check order", checkQuery);
-		// 	it("[valid/validmin.json] valid min and check order", checkQuery);
-		// 	it("[valid/validsum.json] valid sum and check order", checkQuery);
+			// check ordering
+			// it("[valid/validAvg.json] valid avg and check order", checkQuery);
+			// it("[valid/validCount.json] valid count and check order", checkQuery);
+			// it("[valid/validmax.json] valid max and check order", checkQuery);
+			// it("[valid/validmin.json] valid min and check order", checkQuery);
+			// it("[valid/validsum.json] valid sum and check order", checkQuery);
 
-		// 	//invalid rooms
-		// 	it("[invalid/invalidKeyTypeForApply.json] invalid key type for apply", checkQuery);
-		// 	it("[invalidTransformationInvalidKeyInApply.json] invalid key type for apply", checkQuery);
-		// 	it("[invalidTransformationMissingApply.json] invalid key type for apply", checkQuery);
-		// 	it("[invalidTransformationMissingGroup.json] invalid key type for apply", checkQuery);
-		// 	it("[invalidTransformationMissingKeyInColumns.json] invalid key type for apply", checkQuery);
-		// 	it("[invalid/invalidEmptyGroupArray.json] invalid group array", checkQuery);
-		// 	it("[invalid/invalidTypeForApply.json] invalid type for apply", checkQuery);
-		// });
+			//invalid rooms
+			it("[invalid/invalidKeyTypeForApply.json] invalid key type for apply", checkQuery);
+			it("[invalid/invalidTransformationInvalidKeyInApply.json] invalid key type for apply", checkQuery);
+			it("[invalid/invalidTransformationMissingApply.json] invalid key type for apply", checkQuery);
+			it("[invalid/invalidTransformationMissingGroup.json] invalid key type for apply", checkQuery);
+			it("[invalid/invalidTransformationMissingKeyInColumns.json] invalid key type for apply", checkQuery);
+			it("[invalid/invalidEmptyGroupArray.json] invalid group array", checkQuery);
+			it("[invalid/invalidTypeForApply.json] invalid type for apply", checkQuery);
+		});
 	});
 
 	describe("listDatasets", function () {
@@ -799,6 +1011,11 @@ describe("InsightFacade", function () {
 			id: "oneCourse",
 			kind: InsightDatasetKind.Sections,
 			numRows: 3,
+		};
+		const chemOnlyDataset: InsightDataset = {
+			id: "chemONLY",
+			kind: InsightDatasetKind.Rooms,
+			numRows: 6,
 		};
 
 		beforeEach(function () {
@@ -809,9 +1026,22 @@ describe("InsightFacade", function () {
 			await clearDisk();
 		});
 
-		it("Should list data after caching", async () => {
+		it("Should list data after caching sections", async () => {
 			try {
-				await facade.addDataset("data", oneCourse, InsightDatasetKind.Sections);
+				await facade.addDataset("oneCourse", oneCourse, InsightDatasetKind.Sections);
+			} catch {
+				expect.fail("Shouldnt get here");
+			}
+
+			const facade2 = new InsightFacade();
+
+			const result = await facade2.listDatasets();
+			expect(result.length).to.equal(1);
+		});
+
+		it("Should list data after caching rooms", async () => {
+			try {
+				await facade.addDataset("chemONLY", CHEMOnly, InsightDatasetKind.Rooms);
 			} catch {
 				expect.fail("Shouldnt get here");
 			}
@@ -855,13 +1085,23 @@ describe("InsightFacade", function () {
 				expect.fail("Should not have thrown!");
 			}
 			const result = await facade.listDatasets();
-			//const godPlease: InsightDataset[] = [oneCourseDataset];
 
 			expect(result[0].id).to.equal("oneCourse");
 			expect(result[0].kind).to.equal(InsightDatasetKind.Sections);
 			expect(result[0].numRows).to.equal(oneCourseDataset.numRows);
+		});
 
-			//return expect(result).to.deep.equal(godPlease);
+		it("should return one room dataset in array", async function () {
+			try {
+				await facade.addDataset("chemOnly", CHEMOnly, InsightDatasetKind.Rooms);
+			} catch {
+				expect.fail("Should not have thrown!");
+			}
+			const result = await facade.listDatasets();
+
+			expect(result[0].id).to.equal("chemOnly");
+			expect(result[0].kind).to.equal(InsightDatasetKind.Rooms);
+			expect(result[0].numRows).to.equal(chemOnlyDataset.numRows);
 		});
 
 		//three datasets added, three removed, empty array returned
@@ -873,6 +1113,23 @@ describe("InsightFacade", function () {
 				await facade.removeDataset("oneCourse");
 				await facade.removeDataset("anotherOneCourse");
 				await facade.removeDataset("threeCourses");
+			} catch {
+				expect.fail("Should not have thrown!");
+			}
+			const result = await facade.listDatasets();
+			return expect(result).to.deep.equal([]);
+		});
+
+		it("should return empty array after removing all mixing kinds", async function () {
+			try {
+				await facade.addDataset("oneCourse", oneCourse, InsightDatasetKind.Sections);
+				await facade.addDataset("anotherOneCourse", anotherOneCourse, InsightDatasetKind.Sections);
+				await facade.addDataset("threeCourses", threeCourses, InsightDatasetKind.Sections);
+				await facade.addDataset("chemONLY", CHEMOnly, InsightDatasetKind.Rooms);
+				await facade.removeDataset("oneCourse");
+				await facade.removeDataset("anotherOneCourse");
+				await facade.removeDataset("threeCourses");
+				await facade.removeDataset("chemONLY");
 			} catch {
 				expect.fail("Should not have thrown!");
 			}
