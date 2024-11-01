@@ -3,12 +3,12 @@ import {
 	InsightDataset,
 	InsightDatasetKind,
 	InsightError,
-	InsightResult,
+	// InsightResult,
 	NotFoundError,
-	ResultTooLargeError,
+	// ResultTooLargeError,
 } from "../../src/controller/IInsightFacade";
 import InsightFacade from "../../src/controller/InsightFacade";
-import { clearDisk, getContentFromArchives, loadTestQuery } from "../TestUtil";
+import { clearDisk, getContentFromArchives } from "../TestUtil";
 
 import { expect, use } from "chai";
 import chaiAsPromised from "chai-as-promised";
