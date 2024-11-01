@@ -1,7 +1,9 @@
 import JSZip from "jszip";
 import Dataset from "./Dataset";
 import Section from "./Section";
+import Room from "./Room";
 import {InsightDatasetKind, InsightError, NotFoundError} from "./IInsightFacade";
+import {parse} from "parse5";
 
 export class DatasetHandler {
 	private datasetIDs: string[] = [];
@@ -40,11 +42,12 @@ export class DatasetHandler {
 			}
 			this.addSectionsDatasetToMemory(id, validSections);
 		} else if (kind === InsightDatasetKind.Rooms) {
-			const validRooms = await this.extractRooms(zip);
-			if (validRooms.length === 0) {
-				throw new InsightError("no valid rooms");
-			}
-			this.addRoomsDatasetToMemory(id, validRooms);
+			// const validRooms = await this.extractRooms(zip);
+			// if (validRooms.length === 0) {
+			// 	throw new InsightError("no valid rooms");
+			// }
+			// this.addRoomsDatasetToMemory(id, validRooms);
+			await this.extractRooms(zip);
 		} else {
 			throw new InsightError("Invalid kind!");
 		}
@@ -67,14 +70,27 @@ export class DatasetHandler {
 	}
 
 	// Extract rooms from zip file
-	private async extractRooms(zip: JSZip): Promise<Room[]> {
+	// private async extractRooms(zip: JSZip): Promise<Room[]> {
+	private async extractRooms(zip: JSZip): Promise<void> {
 		//TODO: finish implementation
-		const fileNames = Object.keys(zip.files).filter(
-			(fileName) => fileName.startsWith("courses/") && !zip.files[fileName].dir
-		);
-		const sectionPromises = fileNames.map(async (fileName) => this.processSectionsFile(zip, fileName));
-		const sectionResults = await Promise.all(sectionPromises);
-		return sectionResults.flat();
+		//find index.htm
+		//call a method to read the table in index.htm: returns array of the filepaths needed or throws an error if something wrong with index.htm
+		//pass array to another method to read each file amnd extract room info from that table
+		let indexContent;
+		if (zip.files["index.htm"] && !zip.files["index.htm"].dir) {
+			try {
+				indexContent = await zip.files["index.htm"].async("text");
+			} catch {
+				throw new InsightError("Error reading file index.htm");
+			}
+		} else {
+			throw new InsightError("index.htm not found");
+		}
+		const buildings = await this.extractBuildingsFromIndex(indexContent);
+
+		for (const b of buildings) {
+			console.log(b);
+		}
 	}
 
 	private async processSectionsFile(zip: JSZip, fileName: string): Promise<Section[]> {
@@ -86,6 +102,15 @@ export class DatasetHandler {
 		} catch {
 			throw new InsightError(`Error processing file ${fileName}`);
 		}
+	}
+
+	private async extractBuildingsFromIndex(indexContent: string): Promise<string[]> {
+		// parse the html
+		// find all the tables
+		// find the building table (can be identified if any one <td> element with classes 'views-field' and 'views-field-field-building-address' is found)
+		// traverse the building table and along the way extract the value in the address column for every building's row in the table
+		// return a string array of all the addresses
+		const parsedHTML = parse(indexContent);
 	}
 
 	private async processRoomsFile(zip: JSZip, fileName: string): Promise<Room[]> {
@@ -109,12 +134,12 @@ export class DatasetHandler {
 		return [];
 	}
 
-	private extractValidRooms(parsedJSON: any): Room[] {
+	private extractValidRooms(parsedHTML: any): Room[] {
 		//TODO: finish implementation
-		if (parsedJSON && Array.isArray(parsedJSON.result)) {
-			return parsedJSON.result
-				.map((section: any) => this.createSectionFromJson(section))
-				.filter((section: Section | null) => section !== null) as Section[];
+		if (parsedHTML && Array.isArray(parsedHTML.result)) {
+			return parsedHTML.result
+				.map((room: any) => this.createRoomFromJson(room))
+				.filter((room: Room | null) => room !== null) as Room[];
 		}
 		return [];
 	}
@@ -150,33 +175,32 @@ export class DatasetHandler {
 		return null;
 	}
 
-	private createRoomFromJson(section: any): Section | null {
-		//TODO: Complete implementation
+	private createRoomFromJson(room: any): Room | null {
 		if (
-			"id" in section &&
-			"Course" in section &&
-			"Title" in section &&
-			"Professor" in section &&
-			"Subject" in section &&
-			"Year" in section &&
-			"Avg" in section &&
-			"Pass" in section &&
-			"Fail" in section &&
-			"Audit" in section
+			"fullname" in room &&
+			"shortname" in room &&
+			"number" in room &&
+			"name" in room &&
+			"address" in room &&
+			"lat" in room &&
+			"lon" in room &&
+			"seats" in room &&
+			"type" in room &&
+			"furniture" in room &&
+			"href" in room
 		) {
-			const overallSectionReplacementYear = 1900;
-			const year = section.Section === "overall" ? overallSectionReplacementYear : section.Year;
-			return new Section(
-				section.id,
-				section.Course,
-				section.Title,
-				section.Professor,
-				section.Subject,
-				year,
-				section.Avg,
-				section.Pass,
-				section.Fail,
-				section.Audit
+			return new Room(
+				room.fullname,
+				room.shortname,
+				room.number,
+				room.name,
+				room.address,
+				room.lat,
+				room.lon,
+				room.seats,
+				room.type,
+				room.furniture,
+				room.href
 			);
 		}
 		return null;
