@@ -4,10 +4,11 @@ import Building from "./Building";
 import { InsightError } from "./IInsightFacade";
 import { parse } from "parse5";
 import { Document, Element } from "parse5/dist/tree-adapters/default";
+import http from "http"; // Make sure to install the 'http' package if not already installed.
 
 export class RoomHandler {
 	public async extractRooms(zip: JSZip): Promise<Room[]> {
-		let indexContent;
+		let indexContent: string;
 		if (zip.files["index.htm"] && !zip.files["index.htm"].dir) {
 			try {
 				indexContent = await zip.files["index.htm"].async("text");
@@ -21,7 +22,6 @@ export class RoomHandler {
 		if (!zip.folder("campus/discover/buildings-and-classrooms")) {
 			throw new InsightError("Error accessing ./campus/discover/buildings-and-classrooms directory");
 		}
-
 		const buildings = await this.extractBuildings(indexContent);
 		const roomResults = await this.processRoomsFile(zip, buildings);
 
@@ -30,21 +30,6 @@ export class RoomHandler {
 		} else {
 			return roomResults.flat();
 		}
-	}
-
-	private async extractBuildings(indexContent: string): Promise<Building[]> {
-		let parsedHTML;
-		try {
-			parsedHTML = parse(indexContent);
-		} catch {
-			throw new InsightError("Error parsing HTML content");
-		}
-		const allTables = this.findAllTables(parsedHTML);
-		const buildingTable = this.findMainTable(allTables);
-		if (buildingTable === null) {
-			throw new InsightError("No building table was found in index.htm");
-		}
-		return this.extractBuildingInfo(buildingTable);
 	}
 
 	private findAllTables(parsedHTML: Document): Document[] {
@@ -89,36 +74,60 @@ export class RoomHandler {
 		return false;
 	}
 
-	private extractBuildingInfo(buildingTable: Document): Building[] {
+	private async extractBuildings(indexContent: string): Promise<Building[]> {
+		let parsedHTML: Document;
+		try {
+			parsedHTML = parse(indexContent);
+		} catch {
+			throw new InsightError("Error parsing HTML content");
+		}
+		const allTables = this.findAllTables(parsedHTML);
+		const buildingTable = this.findMainTable(allTables);
+		if (buildingTable === null) {
+			throw new InsightError("No building table was found in index.htm");
+		}
+		const buildings = await this.processBuildingTable(buildingTable);
+		return buildings;
+	}
+
+	private async processBuildingTable(buildingTable: Document): Promise<Building[]> {
 		const buildings: Building[] = [];
-		const traverseAndExtract = (node: any, currentBuilding: any): void => {
-			if (node.tagName === "td") {
-				this.extractBuildingAttributes(node, currentBuilding);
-			}
-			if (node.childNodes) {
-				for (const child of node.childNodes) {
-					traverseAndExtract(child, currentBuilding);
-				}
-			}
-		};
-		const traverseRows = (node: any): void => {
-			if (node.tagName === "tr") {
-				const currentBuilding: any = this.initializeEmptyBuilding();
-				traverseAndExtract(node, currentBuilding);
-				this.addBuildingIfValid(currentBuilding, buildings);
-			}
-			if (node.childNodes) {
-				for (const child of node.childNodes) {
-					traverseRows(child);
-				}
-			}
-		};
 		if (buildingTable.childNodes) {
-			for (const child of buildingTable.childNodes) {
-				traverseRows(child);
-			}
+			await Promise.all(
+				buildingTable.childNodes.map(async (child: any) => {
+					await this.traverseBuildingRows(child, buildings);
+				})
+			);
 		}
 		return buildings;
+	}
+
+	private async traverseBuildingRows(node: any, buildings: Building[]): Promise<void> {
+		if (node.tagName === "tr") {
+			const currentBuilding: any = this.initializeEmptyBuilding();
+			await this.traverseAndExtractBuildingAttributes(node, currentBuilding);
+			await this.addBuildingIfValid(currentBuilding, buildings);
+		}
+		if (node.childNodes) {
+			await Promise.all(
+				node.childNodes.map(async (child: any) => {
+					await this.traverseBuildingRows(child, buildings);
+				})
+			);
+		}
+	}
+
+	private async traverseAndExtractBuildingAttributes(node: any, currentBuilding: any): Promise<void> {
+		if (node.tagName === "td") {
+			this.extractBuildingAttributes(node, currentBuilding);
+		}
+		if (node.childNodes) {
+			await Promise.all(
+				node.childNodes.map(async (child: any) => {
+					await this.traverseAndExtractBuildingAttributes(child, currentBuilding);
+				})
+			);
+		}
 	}
 
 	private extractBuildingAttributes(node: any, currentBuilding: any): void {
@@ -155,12 +164,42 @@ export class RoomHandler {
 		};
 	}
 
-	private addBuildingIfValid(currentBuilding: any, buildings: Building[]): void {
+	private async addBuildingIfValid(currentBuilding: any, buildings: Building[]): Promise<void> {
 		const { fullName, shortName, address, directory } = currentBuilding;
 		if (fullName && shortName && address && directory) {
-			const building = new Building(fullName, shortName, address, 0, 0, directory);
+			const { lat, lon } = await this.makeGeolocationRequest(address);
+			currentBuilding.lat = lat;
+			currentBuilding.lon = lon;
+			const building = new Building(fullName, shortName, address, lat, lon, directory);
 			buildings.push(building);
 		}
+	}
+
+	private async makeGeolocationRequest(address: string): Promise<{ lat: number; lon: number }> {
+		const url = `http://cs310.students.cs.ubc.ca:11316/api/v1/project_team086/${encodeURIComponent(address)}`;
+		const response = await this.httpRequest(url);
+		const data = JSON.parse(response);
+		if (data.error) {
+			throw new InsightError(`Error fetching geolocation for address: ${address}`);
+		}
+		return { lat: data.lat, lon: data.lon };
+	}
+
+	private async httpRequest(url: string): Promise<string> {
+		return new Promise((resolve, reject) => {
+			http.get(url, (response) => {
+				let data = "";
+				response.on("data", (chunk) => {
+					data += chunk;
+				});
+				response.on("end", () => {
+					resolve(data);
+				});
+				response.on("error", (err) => {
+					reject(err);
+				});
+			});
+		});
 	}
 
 	private async processRoomsFile(zip: JSZip, buildings: Building[]): Promise<Room[]> {
@@ -182,32 +221,32 @@ export class RoomHandler {
 		return roomsArrays.flat();
 	}
 
-	private extractValidRooms(parsedHTML: any, building: Building): Room[] {
+	private extractValidRooms(parsedHTML: Document, building: Building): Room[] {
 		const allTables = this.findAllTables(parsedHTML);
 		const roomsTable = this.findMainTable(allTables);
 		const rooms: Room[] = [];
 		if (roomsTable.childNodes) {
-			for (const child of roomsTable.childNodes) {
-				this.traverseRows(child, building, rooms);
-			}
+			void this.traverseRows(roomsTable.childNodes, building, rooms);
 		}
 		return rooms;
 	}
 
-	private traverseRows(node: any, building: Building, rooms: Room[]): void {
-		if (node.tagName === "tr") {
-			const currentRoom = this.initializeRoom(building);
-			this.traverseAndExtract(node, currentRoom);
-			if (this.isRoomValid(currentRoom)) {
-				const room = this.constructRoom(currentRoom);
-				rooms.push(room);
-			}
-		}
-		if (node.childNodes) {
-			for (const child of node.childNodes) {
-				this.traverseRows(child, building, rooms);
-			}
-		}
+	private async traverseRows(nodes: any[], building: Building, rooms: Room[]): Promise<void> {
+		await Promise.all(
+			nodes.map(async (node: any) => {
+				if (node.tagName === "tr") {
+					const currentRoom = this.initializeRoom(building);
+					this.traverseAndExtract(node, currentRoom);
+					if (this.isRoomValid(currentRoom)) {
+						const room = this.constructRoom(currentRoom);
+						rooms.push(room);
+					}
+				}
+				if (node.childNodes) {
+					await this.traverseRows(node.childNodes, building, rooms);
+				}
+			})
+		);
 	}
 
 	private traverseAndExtract(node: any, currentRoom: any): void {
@@ -218,9 +257,9 @@ export class RoomHandler {
 			}
 		}
 		if (node.childNodes) {
-			for (const child of node.childNodes) {
+			node.childNodes.forEach((child: any) => {
 				this.traverseAndExtract(child, currentRoom);
-			}
+			});
 		}
 	}
 
@@ -253,8 +292,8 @@ export class RoomHandler {
 			number: "",
 			name: "",
 			address: building.getAddress(),
-			lat: 1,
-			lon: 1,
+			lat: building.getLat(),
+			lon: building.getLon(),
 			seats: 0,
 			type: "",
 			furniture: "",

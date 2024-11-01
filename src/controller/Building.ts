@@ -2,8 +2,8 @@ export default class Building {
 	private readonly fullName: string;
 	private readonly shortName: string;
 	private readonly address: string;
-	private readonly lat: number;
-	private readonly lon: number;
+	private lat: number;
+	private lon: number;
 	private readonly directory: string;
 
 	constructor(fullName: string, shortName: string, address: string, lat: number, lon: number, directory: string) {
@@ -37,5 +37,13 @@ export default class Building {
 
 	public getDirectory(): string {
 		return this.directory;
+	}
+
+	public setLat(lat: number): void {
+		this.lat = lat;
+	}
+
+	public setLon(lon: number): void {
+		this.lon = lon;
 	}
 }

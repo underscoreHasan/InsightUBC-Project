@@ -53,21 +53,21 @@ export class DatasetHandler {
 		} else if (kind === InsightDatasetKind.Rooms) {
 			const validRooms = await this.roomHandler.extractRooms(zip);
 
-			// for (const room of validRooms) {
-			// 	console.log('Room Details:');
-			// 	console.log(`  Full Name: ${room.getFullName()}`);
-			// 	console.log(`  Short Name: ${room.getShortName()}`);
-			// 	console.log(`  Number: ${room.getNumber()}`);
-			// 	console.log(`  Name: ${room.getName()}`);
-			// 	console.log(`  Address: ${room.getAddress()}`);
-			// 	console.log(`  Latitude: ${room.getLat()}`);
-			// 	console.log(`  Longitude: ${room.getLon()}`);
-			// 	console.log(`  Seats: ${room.getSeats()}`);
-			// 	console.log(`  Type: ${room.getType()}`);
-			// 	console.log(`  Furniture: ${room.getFurniture()}`);
-			// 	console.log(`  Href: ${room.getHref()}`);
-			// }
-			// console.log(validRooms.length);
+			for (const room of validRooms) {
+				console.log("Room Details:");
+				console.log(`  Full Name: ${room.getFullName()}`);
+				console.log(`  Short Name: ${room.getShortName()}`);
+				console.log(`  Number: ${room.getNumber()}`);
+				console.log(`  Name: ${room.getName()}`);
+				console.log(`  Address: ${room.getAddress()}`);
+				console.log(`  Latitude: ${room.getLat()}`);
+				console.log(`  Longitude: ${room.getLon()}`);
+				console.log(`  Seats: ${room.getSeats()}`);
+				console.log(`  Type: ${room.getType()}`);
+				console.log(`  Furniture: ${room.getFurniture()}`);
+				console.log(`  Href: ${room.getHref()}`);
+			}
+			console.log(validRooms.length);
 
 			if (validRooms.length === 0) {
 				throw new InsightError("no valid rooms");
