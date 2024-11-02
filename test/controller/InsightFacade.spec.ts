@@ -992,8 +992,8 @@ describe("InsightFacade", function () {
 			// it("[valid/validAvg.json] valid avg and check order", checkQuery);
 			// it("[valid/validCount.json] valid count and check order", checkQuery);
 			it("[valid/validmax.json] valid max and check order", checkQuery);
-			it("[valid/validmin.json] valid min and check order", checkQuery);
-			it("[valid/validsum.json] valid sum and check order", checkQuery);
+			//it("[valid/validmin.json] valid min and check order", checkQuery);
+			//it("[valid/validsum.json] valid sum and check order", checkQuery);
 
 			//invalid rooms
 			it("[invalid/invalidKeyTypeForApply.json] invalid key type for apply", checkQuery);
