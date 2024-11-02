@@ -34,7 +34,7 @@ export class SectionHandler {
 
 	private createSectionFromJson(section: any): Section | null {
 		const overallSectionReplacementYear = 1900;
-		const year = section.Section === "overall" ? overallSectionReplacementYear : section.Year;
+		const year = Number(section.Section === "overall" ? overallSectionReplacementYear : section.Year);
 
 		if (
 			"id" in section &&
@@ -49,7 +49,7 @@ export class SectionHandler {
 			"Audit" in section
 		) {
 			return new Section(
-				section.id,
+				String(section.id),
 				section.Course,
 				section.Title,
 				section.Professor,

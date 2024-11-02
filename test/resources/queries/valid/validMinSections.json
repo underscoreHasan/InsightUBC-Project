@@ -1,0 +1,243 @@
+{
+	"title": "valid min",
+	"input": {
+		"WHERE": {
+			"OR": [
+				{
+					"AND": [
+						{
+							"GT": {
+								"sections_avg": 90
+							}
+						},
+						{
+							"IS": {
+								"sections_dept": "adhe"
+							}
+						}
+					]
+				},
+				{
+					"AND": [
+						{
+							"EQ": {
+								"sections_avg": 95
+							}
+						},
+						{
+							"NOT": {
+								"IS": {
+									"sections_dept": "sowk"
+								}
+							}
+						}
+					]
+				}
+			]
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"sections_dept",
+				"sections_avg",
+				"minYear",
+				"counter"
+			],
+			"ORDER": "sections_avg"
+		},
+		"TRANSFORMATIONS": {
+			"GROUP": [
+				"sections_dept",
+				"sections_avg"
+			],
+			"APPLY": [
+				{
+					"minYear": {
+						"MIN": "sections_year"
+					}
+				},
+				{
+					"counter": {
+						"COUNT": "sections_id"
+					}
+				}
+			]
+		}
+	},
+	"errorExpected": false,
+	"expected": [
+		{
+			"sections_dept": "adhe",
+			"sections_avg": 90.02,
+			"minYear": 1900,
+			"counter": 1
+		},
+		{
+			"sections_dept": "adhe",
+			"sections_avg": 90.16,
+			"minYear": 2015,
+			"counter": 1
+		},
+		{
+			"sections_dept": "adhe",
+			"sections_avg": 90.17,
+			"minYear": 2011,
+			"counter": 1
+		},
+		{
+			"sections_dept": "adhe",
+			"sections_avg": 90.18,
+			"minYear": 2007,
+			"counter": 1
+		},
+		{
+			"sections_dept": "adhe",
+			"sections_avg": 90.5,
+			"minYear": 2012,
+			"counter": 1
+		},
+		{
+			"sections_dept": "adhe",
+			"sections_avg": 90.72,
+			"minYear": 2014,
+			"counter": 1
+		},
+		{
+			"sections_dept": "adhe",
+			"sections_avg": 90.82,
+			"minYear": 2015,
+			"counter": 1
+		},
+		{
+			"sections_dept": "adhe",
+			"sections_avg": 90.85,
+			"minYear": 1900,
+			"counter": 1
+		},
+		{
+			"sections_dept": "adhe",
+			"sections_avg": 91.29,
+			"minYear": 2016,
+			"counter": 1
+		},
+		{
+			"sections_dept": "adhe",
+			"sections_avg": 91.33,
+			"minYear": 1900,
+			"counter": 1
+		},
+		{
+			"sections_dept": "adhe",
+			"sections_avg": 91.48,
+			"minYear": 2009,
+			"counter": 1
+		},
+		{
+			"sections_dept": "adhe",
+			"sections_avg": 92.54,
+			"minYear": 2015,
+			"counter": 1
+		},
+		{
+			"sections_dept": "adhe",
+			"sections_avg": 93.33,
+			"minYear": 2016,
+			"counter": 1
+		},
+		{
+			"sections_dept": "bmeg",
+			"sections_avg": 95,
+			"minYear": 1900,
+			"counter": 1
+		},
+		{
+			"sections_dept": "cnps",
+			"sections_avg": 95,
+			"minYear": 1900,
+			"counter": 1
+		},
+		{
+			"sections_dept": "cpsc",
+			"sections_avg": 95,
+			"minYear": 1900,
+			"counter": 1
+		},
+		{
+			"sections_dept": "crwr",
+			"sections_avg": 95,
+			"minYear": 1900,
+			"counter": 1
+		},
+		{
+			"sections_dept": "econ",
+			"sections_avg": 95,
+			"minYear": 1900,
+			"counter": 1
+		},
+		{
+			"sections_dept": "edcp",
+			"sections_avg": 95,
+			"minYear": 1900,
+			"counter": 1
+		},
+		{
+			"sections_dept": "epse",
+			"sections_avg": 95,
+			"minYear": 1900,
+			"counter": 2
+		},
+		{
+			"sections_dept": "kin",
+			"sections_avg": 95,
+			"minYear": 2013,
+			"counter": 2
+		},
+		{
+			"sections_dept": "math",
+			"sections_avg": 95,
+			"minYear": 1900,
+			"counter": 1
+		},
+		{
+			"sections_dept": "mtrl",
+			"sections_avg": 95,
+			"minYear": 1900,
+			"counter": 2
+		},
+		{
+			"sections_dept": "musc",
+			"sections_avg": 95,
+			"minYear": 1900,
+			"counter": 1
+		},
+		{
+			"sections_dept": "nurs",
+			"sections_avg": 95,
+			"minYear": 1900,
+			"counter": 1
+		},
+		{
+			"sections_dept": "obst",
+			"sections_avg": 95,
+			"minYear": 1900,
+			"counter": 1
+		},
+		{
+			"sections_dept": "psyc",
+			"sections_avg": 95,
+			"minYear": 1900,
+			"counter": 1
+		},
+		{
+			"sections_dept": "rhsc",
+			"sections_avg": 95,
+			"minYear": 2009,
+			"counter": 1
+		},
+		{
+			"sections_dept": "adhe",
+			"sections_avg": 96.11,
+			"minYear": 2015,
+			"counter": 1
+		}
+	]
+}
