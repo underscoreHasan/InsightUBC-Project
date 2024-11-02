@@ -235,7 +235,9 @@ export function sortResults(results: any[], keys: string[], dir: "UP" | "DOWN" =
 
 	// Process keys to ignore prefixes if present, for example "sections_avg" -> "avg"
 	const splitSortKeys = keys.map((key) => (key.includes("_") ? key.split("_")[1] : key));
-
+	if (!splitSortKeys) {
+		throw new InsightError("Weird behavior...");
+	}
 	return results.sort((a, b) => {
 		for (const key of splitSortKeys) {
 			if (a[key] < b[key]) {
