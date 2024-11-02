@@ -250,7 +250,7 @@ export class RoomHandler {
 					currentRoom.href = hrefAttr.value;
 					if (anchor.childNodes && anchor.childNodes.length > 0) {
 						const roomNumberTextNode = anchor.childNodes[0] as TextNode;
-						currentRoom.number = String(roomNumberTextNode["value" as keyof Object]).trim();
+						currentRoom.number = Number(roomNumberTextNode["value" as keyof Object]);
 					}
 				}
 			}
@@ -281,7 +281,8 @@ export class RoomHandler {
 
 	private isRoomValid(room: any): boolean {
 		const { fullName, shortName, number, address, lat, lon, seats, type, furniture, href } = room;
-		return (typeof fullName === "string" &&
+		return (
+			typeof fullName === "string" &&
 			typeof shortName === "string" &&
 			typeof number === "number" &&
 			typeof address === "string" &&
@@ -290,7 +291,8 @@ export class RoomHandler {
 			typeof seats === "number" &&
 			typeof type === "string" &&
 			typeof furniture === "string" &&
-			typeof href === "string");
+			typeof href === "string"
+		);
 	}
 
 	private constructRoom(room: any): Room {
