@@ -1,0 +1,46 @@
+{
+	"title": "valid no transform rooms",
+	"input": {
+		"WHERE": {
+			"AND": [
+				{
+					"IS": {
+						"rooms_furniture": "*Tables*"
+					}
+				},
+				{
+					"GT": {
+						"rooms_seats": 300
+					}
+				}
+			]
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"rooms_shortname"
+			],
+			"ORDER": {
+				"dir": "DOWN",
+				"keys": [
+					"rooms_shortname"
+				]
+			}
+		}
+	},
+	"errorExpected": false,
+	"expected": [
+		{
+			"rooms_shortname": "OSBO"
+		},
+		{
+			"rooms_shortname": "LSC"
+		},
+		{
+			"rooms_shortname": "LSC"
+		},
+		{
+			"rooms_shortname": "HEBB"
+		}
+	],
+	"order":true
+}

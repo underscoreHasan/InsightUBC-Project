@@ -985,6 +985,7 @@ describe("InsightFacade", function () {
 			it("[invalid/morethanonedatasetcolumns.json] column has more than one dataset", checkQuery);
 			it("[invalid/invalidgroup.json] invalid group name", checkQuery);
 
+			it("[valid/validNoTransformRooms.json] no transform rooms", checkQuery);
 			it("[valid/rooms.json] default rooms test", checkQuery);
 			it("[valid/validnokeys.json] no keys in order", checkQuery);
 
@@ -996,14 +997,6 @@ describe("InsightFacade", function () {
 			it("[valid/validsum.json] valid sum and check order", checkQuery);
 			it("[valid/tiebreakMin.json] tiebreaking min", checkQuery);
 			it("[valid/tiebreakMax.json] tiebreaking max", checkQuery);
-			//invalid rooms
-			it("[invalid/invalidKeyTypeForApply.json] invalid key type for apply", checkQuery);
-			it("[invalid/invalidTransformationInvalidKeyInApply.json] invalid key type for apply", checkQuery);
-			it("[invalid/invalidTransformationMissingApply.json] invalid key type for apply", checkQuery);
-			it("[invalid/invalidTransformationMissingGroup.json] invalid key type for apply", checkQuery);
-			it("[invalid/invalidTransformationMissingKeyInColumns.json] invalid key type for apply", checkQuery);
-			it("[invalid/invalidEmptyGroupArray.json] invalid group array", checkQuery);
-			it("[invalid/invalidTypeForApply.json] invalid type for apply", checkQuery);
 		});
 	});
 

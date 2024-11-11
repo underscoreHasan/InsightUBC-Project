@@ -261,6 +261,7 @@ export function validateNoRooms(options: any): string {
 		const curDatasetID = splitField[0];
 		const curField = splitField[1];
 		if (!curDatasetID === prevDatasetID || !ValidFields.has(curField)) {
+			console.log(curDatasetID, prevDatasetID, curField);
 			throw new InsightError("Error with columns");
 		}
 		prevDatasetID = curDatasetID;
