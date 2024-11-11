@@ -984,8 +984,8 @@ describe("InsightFacade", function () {
 			it("[invalid/missingKeys.json] missing keys in order", checkQuery);
 			it("[invalid/morethanonedatasetcolumns.json] column has more than one dataset", checkQuery);
 			it("[invalid/invalidgroup.json] invalid group name", checkQuery);
-			
-			it("[valid/validNoTransformRooms.json] no transform rooms",checkQuery);
+
+			it("[valid/validNoTransformRooms.json] no transform rooms", checkQuery);
 			it("[valid/rooms.json] default rooms test", checkQuery);
 			it("[valid/validnokeys.json] no keys in order", checkQuery);
 
