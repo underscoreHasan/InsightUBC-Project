@@ -3,11 +3,13 @@ import { StatusCodes } from "http-status-codes";
 import Log from "@ubccpsc310/folder-test/build/Log";
 import * as http from "http";
 import cors from "cors";
+import { ServerHandler } from "./ServerHandler";
 
 export default class Server {
 	private readonly port: number;
 	private express: Application;
 	private server: http.Server | undefined;
+	private ServerInstance: ServerHandler;
 
 	constructor(port: number) {
 		Log.info(`Server::<init>( ${port} )`);
@@ -15,12 +17,14 @@ export default class Server {
 		this.express = express();
 
 		this.registerMiddleware();
+		this.ServerInstance = new ServerHandler();
+
 		this.registerRoutes();
 
 		// NOTE: you can serve static frontend files in from your express server
 		// by uncommenting the line below. This makes files in ./frontend/public
 		// accessible at http://localhost:<port>/
-		// this.express.use(express.static("./frontend/public"))
+		this.express.use(express.static("./frontend/public"));
 	}
 
 	/**
@@ -87,7 +91,10 @@ export default class Server {
 		// This is an example endpoint this you can invoke by accessing this URL in your browser:
 		// http://localhost:4321/echo/hello
 		this.express.get("/echo/:msg", Server.echo);
-
+		this.express.put("/dataset/:id/:kind", this.ServerInstance.datasetPut.bind(this.ServerInstance));
+		this.express.delete("/dataset/:id", this.ServerInstance.datasetDelete.bind(this.ServerInstance));
+		this.express.post("/query", this.ServerInstance.datasetQuery.bind(this.ServerInstance));
+		this.express.get("/datasets", this.ServerInstance.datasetGet.bind(this.ServerInstance));
 		// TODO: your other endpoints should go here
 	}
 
