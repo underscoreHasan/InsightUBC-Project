@@ -3,11 +3,70 @@ import request, { Response } from "supertest";
 import { StatusCodes } from "http-status-codes";
 import Log from "@ubccpsc310/folder-test/build/Log";
 import Server from "../../src/rest/Server";
-import { loadTestQuery } from "../TestUtil";
-import { log } from "console";
-describe.only("Facade C3", function () {
+import { clearDisk, loadTestQuery } from "../TestUtil";
+import fs from "fs";
+import path from "path";
+
+describe("Facade C3", function () {
+	let rawOneCourseData: Buffer;
 	const testPort = 5000;
 	const testServer = new Server(testPort);
+
+	async function putDataset(id: any, kind: any, fileName: any, port = testPort): Promise<void> {
+		return new Promise((resolve, reject) => {
+			fs.readFile(path.resolve(__dirname, `../resources/archives/${fileName}`), (err, res) => {
+				if (err) {
+					return reject(new Error("Error reading data: " + err));
+				}
+
+				rawOneCourseData = res;
+				const SERVER_URL = `http://localhost:${port}`;
+				let ENDPOINT_URL = "/dataset/:id/:kind";
+				ENDPOINT_URL = ENDPOINT_URL.replace(":id", id).replace(":kind", kind);
+
+				Log.info("Starting to add dataset");
+
+				request(SERVER_URL)
+					.put(ENDPOINT_URL)
+					.send(rawOneCourseData)
+					.set("Content-Type", "application/x-zip-compressed")
+					.then(() => {
+						Log.info("Added dataset");
+						resolve();
+					})
+					.catch((error) => {
+						Log.error(error);
+						reject(error);
+					});
+			});
+		});
+	}
+
+	async function deleteDataset(id: any): Promise<void> {
+		return new Promise((resolve, reject) => {
+			const SERVER_URL = `http://localhost:${testPort}`;
+			let ENDPOINT_URL = "/dataset/:id";
+			ENDPOINT_URL = ENDPOINT_URL.replace(":id", id);
+			Log.info(ENDPOINT_URL);
+			try {
+				return request(SERVER_URL)
+					.delete(ENDPOINT_URL)
+					.then((res: Response) => {
+						Log.info("Response", res.body);
+						expect(res.status).to.be.equal(StatusCodes.OK);
+						expect(res.body.result).to.be.equal(id);
+						resolve();
+					})
+					.catch(function (err) {
+						Log.error(err);
+						expect.fail();
+						reject();
+					});
+			} catch (err) {
+				Log.error(err);
+			}
+		});
+	}
 
 	before(async function () {
 		// TODO: start server here once and handle errors properly
@@ -61,21 +120,36 @@ describe.only("Facade C3", function () {
 
 	describe("PUT tests", () => {
 		const SERVER_URL = `http://localhost:${testPort}`;
-		const ENDPOINT_URL = "/dataset/:id/:kind";
+		let ENDPOINT_URL = "/dataset/:id/:kind";
+		before((done) => {
+			fs.readFile(path.resolve(__dirname, "../resources/archives/AnotherOneCourse.zip"), (err, res) => {
+				if (err) {
+					throw new Error("Error reading data" + err);
+				}
+				rawOneCourseData = res;
+				done();
+			});
+		});
+		afterEach(async () => {
+			await clearDisk();
+		});
 		// Sample on how to format PUT requests
 		it("PUT test for courses dataset", function () {
-			const ZIP_FILE_DATA = "TBD";
+			const ZIP_FILE_DATA = rawOneCourseData;
 			const id = "datasetID";
 			const kind = "sections";
-			ENDPOINT_URL.replace(":id", id).replace(":kind", kind);
+			ENDPOINT_URL = ENDPOINT_URL.replace(":id", id).replace(":kind", kind);
 			try {
 				return request(SERVER_URL)
 					.put(ENDPOINT_URL)
 					.send(ZIP_FILE_DATA)
 					.set("Content-Type", "application/x-zip-compressed")
-					.then(function (res: Response) {
+					.then(async function (res: Response) {
 						Log.info("Request response:", res.status);
+
 						expect(res.status).to.be.equal(StatusCodes.OK);
+						expect(res.body.result).to.have.members([id]);
+						await deleteDataset(id);
 					})
 					.catch(function (err) {
 						// some logging here please!
@@ -89,8 +163,8 @@ describe.only("Facade C3", function () {
 		});
 
 		it("PUT test with invalid zip", () => {
-			const ZIP_FILE_DATA = "ERR";
-			const id = "datasetID";
+			const ZIP_FILE_DATA = undefined;
+			const id = "invalidID";
 			const kind = "sections";
 			ENDPOINT_URL.replace(":id", id).replace(":kind", kind);
 			try {
@@ -101,10 +175,12 @@ describe.only("Facade C3", function () {
 					.then(function (res: Response) {
 						Log.info("Request response:", res.status);
 						expect(res.status).to.be.equal(StatusCodes.BAD_REQUEST);
+						expect(res.body).to.deep.equal({
+							error: "Error with fn",
+						});
 					})
 					.catch(function (err) {
-						// some logging here please!
-						Log.error("Shouldn't get here:", err);
+						Log.error("Shouldn't get here:" + err);
 						expect.fail();
 					});
 			} catch (err) {
@@ -114,49 +190,34 @@ describe.only("Facade C3", function () {
 		});
 	});
 
-	describe("DELETE delete dataset tests", () => {
-		beforeEach(() => {
-			const TEMP_URL = `http://localhost:${testPort}`;
-			const TEMP_ENDPOINT = "/dataset/:id/:kind";
-			// Sample on how to format PUT requests
-			it("PUT test for courses dataset", function () {
-				const ZIP_FILE_DATA = "TBD";
-				const id = "datasetID";
-				const kind = "sections";
-				TEMP_ENDPOINT.replace(":id", id).replace(":kind", kind);
-				try {
-					return request(TEMP_URL)
-						.put(TEMP_ENDPOINT)
-						.send(ZIP_FILE_DATA)
-						.set("Content-Type", "application/x-zip-compressed")
-						.then(function (res: Response) {
-							Log.info("Request response:", res.status);
-							expect(res.status).to.be.equal(StatusCodes.OK);
-						})
-						.catch(function (err) {
-							// some logging here please!
-							Log.error(err);
-							expect.fail();
-						});
-				} catch (err) {
-					Log.error(err);
-					// and some more logging here!
-				}
-			});
+	describe("DELETE  dataset tests", () => {
+		const id = "deleteID";
+		let ENDPOINT_URL = "/dataset/:id";
+		const SERVER_URL = `http://localhost:${testPort}`;
+
+		beforeEach(async () => {
+			await putDataset(id, "sections", "AnotherOneCourse.zip");
+			ENDPOINT_URL = "/dataset/:id";
 		});
 
-		const SERVER_URL = `http://localhost:${testPort}`;
-		const ENDPOINT_URL = "/dataset/:id/";
+		afterEach(async () => {
+			await clearDisk();
+		});
+
+		after(async () => {
+			await deleteDataset(id);
+		});
 
 		it("Delete valid dataset", () => {
-			const id = "datasetID";
-			ENDPOINT_URL.replace(":id", id);
+			ENDPOINT_URL = ENDPOINT_URL.replace(":id", id);
+			Log.info(ENDPOINT_URL);
 			try {
 				return request(SERVER_URL)
-					.get(ENDPOINT_URL)
+					.delete(ENDPOINT_URL)
 					.then((res: Response) => {
-						Log.info(res.text);
+						Log.info("Response", res.body);
 						expect(res.status).to.be.equal(StatusCodes.OK);
+						expect(res.body.result).to.be.equal(id);
 					})
 					.catch(function (err) {
 						Log.error(err);
@@ -168,14 +229,16 @@ describe.only("Facade C3", function () {
 		});
 
 		it("Delete dataset with insightError", () => {
-			const id = "datasetID";
-			ENDPOINT_URL.replace(":id", id);
+			const tempid = "___invalid__id";
+			ENDPOINT_URL = ENDPOINT_URL.replace(":id", tempid);
+			const expectedResult = { error: "error with fn" };
 			try {
 				return request(SERVER_URL)
-					.get(ENDPOINT_URL)
+					.delete(ENDPOINT_URL)
 					.then((res: Response) => {
-						Log.info(res.text);
+						Log.info(res.body);
 						expect(res.status).to.be.equal(StatusCodes.BAD_REQUEST);
+						expect(res.body).to.deep.equal(expectedResult);
 					})
 					.catch(function (err) {
 						Log.error(err);
@@ -187,14 +250,16 @@ describe.only("Facade C3", function () {
 		});
 
 		it("Delete dataset with notFoundError", () => {
-			const id = "datasetID";
-			ENDPOINT_URL.replace(":id", id);
+			const tempid = "nonexistent";
+			ENDPOINT_URL = ENDPOINT_URL.replace(":id", tempid);
+			const expectedResult = { error: "not found dataset" };
 			try {
 				return request(SERVER_URL)
-					.get(ENDPOINT_URL)
+					.delete(ENDPOINT_URL)
 					.then((res: Response) => {
-						Log.info(res.text);
+						Log.info(res.body);
 						expect(res.status).to.be.equal(StatusCodes.NOT_FOUND);
+						expect(res.body).to.deep.equal(expectedResult);
 					})
 					.catch(function (err) {
 						Log.error(err);
@@ -207,40 +272,22 @@ describe.only("Facade C3", function () {
 	});
 
 	describe("POST post query tests", () => {
-		async function addData(): Promise<void> {
-			const TEMP_URL = `http://localhost:${testPort}`;
-			const TEMP_ENDPOINT = "/dataset/:id/:kind";
-			// Sample on how to format PUT requests
-			const ZIP_FILE_DATA = "TBD";
-			const id = "datasetID";
-			const kind = "sections";
-			TEMP_ENDPOINT.replace(":id", id).replace(":kind", kind);
-			try {
-				return request(TEMP_URL)
-					.put(TEMP_ENDPOINT)
-					.send(ZIP_FILE_DATA)
-					.set("Content-Type", "application/x-zip-compressed")
-					.then(function (res: Response) {
-						Log.info("Request response:", res.status);
-						expect(res.status).to.be.equal(StatusCodes.OK);
-					})
-					.catch(function (err) {
-						// some logging here please!
-						Log.error(err);
-						expect.fail();
-					});
-			} catch (err) {
-				Log.error(err);
-				// and some more logging here!
-			}
-		}
+		const queryID = "sections";
+		before(async () => {
+			await putDataset(queryID, "sections", "pair.zip");
+		});
+
+		after(async () => {
+			await clearDisk();
+			await deleteDataset(queryID);
+		});
+
 		const SERVER_URL = `http://localhost:${testPort}`;
 		const ENDPOINT_URL = "/query";
 
 		it("Valid query on added dataset", async () => {
 			const sampleQuery = await loadTestQuery("[valid/simple.json]");
 			const input: any = sampleQuery.input;
-			await addData();
 			try {
 				return request(SERVER_URL)
 					.post(ENDPOINT_URL)
@@ -248,24 +295,20 @@ describe.only("Facade C3", function () {
 					.set("Content-Type", "application/json")
 					.then((res: Response) => {
 						Log.info("Request status:", res.status);
+						Log.info(res.body);
 						expect(res.status).to.be.equal(StatusCodes.OK);
+						expect(res.body.result).to.have.deep.members(sampleQuery.expected);
 					})
-					.catch(() => {
+					.catch((err) => {
+						Log.error(err);
 						expect.fail();
 					});
 			} catch (err) {
 				Log.error(err);
 			}
 		});
-		it("Valid query with stop and start server", async () => {
-			try {
-				await testServer.stop();
-				await testServer.start();
-			} catch (err) {
-				Log.error("error", err);
-			}
-
-			const sampleQuery = await loadTestQuery("[valid/simple.json]");
+		it("Valid query with sorting query", async () => {
+			const sampleQuery = await loadTestQuery("[valid/testOrderSort.json]");
 			const input: any = sampleQuery.input;
 			try {
 				return request(SERVER_URL)
@@ -275,12 +318,13 @@ describe.only("Facade C3", function () {
 					.then((res: Response) => {
 						Log.info("Request status:", res.status);
 						expect(res.status).to.be.equal(StatusCodes.OK);
+						expect(res.body.result).to.have.deep.members(sampleQuery.expected);
 					})
 					.catch(() => {
 						expect.fail();
 					});
 			} catch (err) {
-				Log.error(err);
+				Log.error("error", err);
 			}
 		});
 		it("Invalid query", async () => {
@@ -304,15 +348,62 @@ describe.only("Facade C3", function () {
 		});
 	});
 	describe("GET datasets", () => {
+		before(async () => {
+			await clearDisk();
+		});
+		afterEach(async () => {
+			await clearDisk();
+		});
 		const SERVER_URL = `http://localhost:${testPort}`;
 		const ENDPOINT_URL = "/datasets";
-		it("GET dataset", () => {
+		it("GET dataset empty", async () => {
 			try {
 				return request(SERVER_URL)
 					.get(ENDPOINT_URL)
 					.then((res: Response) => {
 						Log.info("Request status", res.status);
 						expect(res.status).to.be.equal(StatusCodes.OK);
+						expect(res.body.result).to.deep.equal([]);
+					})
+					.catch(() => {
+						expect.fail();
+					});
+			} catch (err) {
+				Log.error(err);
+			}
+		});
+		it("GET dataset", async () => {
+			try {
+				await putDataset("data1", "sections", "ThreeCourses.zip");
+				return request(SERVER_URL)
+					.get(ENDPOINT_URL)
+					.then((res: Response) => {
+						Log.info("Request status", res.status);
+						Log.info(res.body);
+
+						expect(res.status).to.be.equal(StatusCodes.OK);
+						expect(res.body.result.length).to.equal(1);
+					})
+					.catch(() => {
+						expect.fail();
+					});
+			} catch (err) {
+				Log.error(err);
+			}
+		});
+
+		it("GET 2 dataset", async () => {
+			const length = 2;
+			try {
+				await putDataset("data1", "sections", "ThreeCourses.zip");
+				await putDataset("data2", "sections", "ThreeCourses.zip");
+
+				return request(SERVER_URL)
+					.get(ENDPOINT_URL)
+					.then((res: Response) => {
+						Log.info("Request status", res.status);
+						expect(res.status).to.be.equal(StatusCodes.OK);
+						expect(res.body.result.length).to.equal(length);
 					})
 					.catch(() => {
 						expect.fail();
