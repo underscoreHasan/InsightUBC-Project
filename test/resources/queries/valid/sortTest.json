@@ -1,0 +1,825 @@
+{
+	"title": "sort test",
+	"input": {
+		"WHERE": {
+			"OR": [
+				{
+					"AND": [
+						{
+							"IS": {
+								"rooms_furniture": "*Tables*"
+							}
+						},
+						{
+							"GT": {
+								"rooms_seats": 300
+							}
+						}
+					]
+				},
+				{
+					"LT": {
+						"rooms_seats": 100
+					}
+				}
+			]
+		},
+		"OPTIONS": {
+			"COLUMNS": [
+				"rooms_shortname",
+				"rooms_seats",
+				"maxSeats"
+			],
+			"ORDER": {
+				"dir": "UP",
+				"keys": [
+					"maxSeats",
+					"rooms_seats",
+					"rooms_shortname"
+				]
+			}
+		},
+		"TRANSFORMATIONS": {
+			"GROUP": [
+				"rooms_shortname",
+				"rooms_seats"
+			],
+			"APPLY": [
+				{
+					"maxSeats": {
+						"MAX": "rooms_seats"
+					}
+				}
+			]
+		}
+	},
+	"errorExpected": false,
+	"order":true,
+	"expected": [
+		{
+			"rooms_shortname": "MCML",
+			"rooms_seats": 6,
+			"maxSeats": 6
+		},
+		{
+			"rooms_shortname": "PHRM",
+			"rooms_seats": 7,
+			"maxSeats": 7
+		},
+		{
+			"rooms_shortname": "IBLC",
+			"rooms_seats": 8,
+			"maxSeats": 8
+		},
+		{
+			"rooms_shortname": "MCML",
+			"rooms_seats": 8,
+			"maxSeats": 8
+		},
+		{
+			"rooms_shortname": "IBLC",
+			"rooms_seats": 10,
+			"maxSeats": 10
+		},
+		{
+			"rooms_shortname": "WOOD",
+			"rooms_seats": 10,
+			"maxSeats": 10
+		},
+		{
+			"rooms_shortname": "FNH",
+			"rooms_seats": 12,
+			"maxSeats": 12
+		},
+		{
+			"rooms_shortname": "IBLC",
+			"rooms_seats": 12,
+			"maxSeats": 12
+		},
+		{
+			"rooms_shortname": "SOWK",
+			"rooms_seats": 12,
+			"maxSeats": 12
+		},
+		{
+			"rooms_shortname": "SPPH",
+			"rooms_seats": 12,
+			"maxSeats": 12
+		},
+		{
+			"rooms_shortname": "WOOD",
+			"rooms_seats": 12,
+			"maxSeats": 12
+		},
+		{
+			"rooms_shortname": "PHRM",
+			"rooms_seats": 14,
+			"maxSeats": 14
+		},
+		{
+			"rooms_shortname": "SPPH",
+			"rooms_seats": 14,
+			"maxSeats": 14
+		},
+		{
+			"rooms_shortname": "WOOD",
+			"rooms_seats": 14,
+			"maxSeats": 14
+		},
+		{
+			"rooms_shortname": "ANGU",
+			"rooms_seats": 16,
+			"maxSeats": 16
+		},
+		{
+			"rooms_shortname": "BIOL",
+			"rooms_seats": 16,
+			"maxSeats": 16
+		},
+		{
+			"rooms_shortname": "IBLC",
+			"rooms_seats": 16,
+			"maxSeats": 16
+		},
+		{
+			"rooms_shortname": "ORCH",
+			"rooms_seats": 16,
+			"maxSeats": 16
+		},
+		{
+			"rooms_shortname": "SOWK",
+			"rooms_seats": 16,
+			"maxSeats": 16
+		},
+		{
+			"rooms_shortname": "SPPH",
+			"rooms_seats": 16,
+			"maxSeats": 16
+		},
+		{
+			"rooms_shortname": "WOOD",
+			"rooms_seats": 16,
+			"maxSeats": 16
+		},
+		{
+			"rooms_shortname": "BUCH",
+			"rooms_seats": 18,
+			"maxSeats": 18
+		},
+		{
+			"rooms_shortname": "FSC",
+			"rooms_seats": 18,
+			"maxSeats": 18
+		},
+		{
+			"rooms_shortname": "ALRD",
+			"rooms_seats": 20,
+			"maxSeats": 20
+		},
+		{
+			"rooms_shortname": "ANGU",
+			"rooms_seats": 20,
+			"maxSeats": 20
+		},
+		{
+			"rooms_shortname": "AUDX",
+			"rooms_seats": 20,
+			"maxSeats": 20
+		},
+		{
+			"rooms_shortname": "FSC",
+			"rooms_seats": 20,
+			"maxSeats": 20
+		},
+		{
+			"rooms_shortname": "LASR",
+			"rooms_seats": 20,
+			"maxSeats": 20
+		},
+		{
+			"rooms_shortname": "ORCH",
+			"rooms_seats": 20,
+			"maxSeats": 20
+		},
+		{
+			"rooms_shortname": "SCRF",
+			"rooms_seats": 20,
+			"maxSeats": 20
+		},
+		{
+			"rooms_shortname": "AUDX",
+			"rooms_seats": 21,
+			"maxSeats": 21
+		},
+		{
+			"rooms_shortname": "GEOG",
+			"rooms_seats": 21,
+			"maxSeats": 21
+		},
+		{
+			"rooms_shortname": "WOOD",
+			"rooms_seats": 21,
+			"maxSeats": 21
+		},
+		{
+			"rooms_shortname": "BUCH",
+			"rooms_seats": 22,
+			"maxSeats": 22
+		},
+		{
+			"rooms_shortname": "CEME",
+			"rooms_seats": 22,
+			"maxSeats": 22
+		},
+		{
+			"rooms_shortname": "BRKX",
+			"rooms_seats": 24,
+			"maxSeats": 24
+		},
+		{
+			"rooms_shortname": "BUCH",
+			"rooms_seats": 24,
+			"maxSeats": 24
+		},
+		{
+			"rooms_shortname": "FSC",
+			"rooms_seats": 24,
+			"maxSeats": 24
+		},
+		{
+			"rooms_shortname": "IBLC",
+			"rooms_seats": 24,
+			"maxSeats": 24
+		},
+		{
+			"rooms_shortname": "MCML",
+			"rooms_seats": 24,
+			"maxSeats": 24
+		},
+		{
+			"rooms_shortname": "PCOH",
+			"rooms_seats": 24,
+			"maxSeats": 24
+		},
+		{
+			"rooms_shortname": "SCRF",
+			"rooms_seats": 24,
+			"maxSeats": 24
+		},
+		{
+			"rooms_shortname": "MATH",
+			"rooms_seats": 25,
+			"maxSeats": 25
+		},
+		{
+			"rooms_shortname": "MGYM",
+			"rooms_seats": 25,
+			"maxSeats": 25
+		},
+		{
+			"rooms_shortname": "ORCH",
+			"rooms_seats": 25,
+			"maxSeats": 25
+		},
+		{
+			"rooms_shortname": "ANSO",
+			"rooms_seats": 26,
+			"maxSeats": 26
+		},
+		{
+			"rooms_shortname": "BUCH",
+			"rooms_seats": 26,
+			"maxSeats": 26
+		},
+		{
+			"rooms_shortname": "CEME",
+			"rooms_seats": 26,
+			"maxSeats": 26
+		},
+		{
+			"rooms_shortname": "FNH",
+			"rooms_seats": 27,
+			"maxSeats": 27
+		},
+		{
+			"rooms_shortname": "SWNG",
+			"rooms_seats": 27,
+			"maxSeats": 27
+		},
+		{
+			"rooms_shortname": "FNH",
+			"rooms_seats": 28,
+			"maxSeats": 28
+		},
+		{
+			"rooms_shortname": "SPPH",
+			"rooms_seats": 28,
+			"maxSeats": 28
+		},
+		{
+			"rooms_shortname": "SOWK",
+			"rooms_seats": 29,
+			"maxSeats": 29
+		},
+		{
+			"rooms_shortname": "BUCH",
+			"rooms_seats": 30,
+			"maxSeats": 30
+		},
+		{
+			"rooms_shortname": "HENN",
+			"rooms_seats": 30,
+			"maxSeats": 30
+		},
+		{
+			"rooms_shortname": "IBLC",
+			"rooms_seats": 30,
+			"maxSeats": 30
+		},
+		{
+			"rooms_shortname": "MATH",
+			"rooms_seats": 30,
+			"maxSeats": 30
+		},
+		{
+			"rooms_shortname": "SPPH",
+			"rooms_seats": 30,
+			"maxSeats": 30
+		},
+		{
+			"rooms_shortname": "UCLL",
+			"rooms_seats": 30,
+			"maxSeats": 30
+		},
+		{
+			"rooms_shortname": "WOOD",
+			"rooms_seats": 30,
+			"maxSeats": 30
+		},
+		{
+			"rooms_shortname": "BUCH",
+			"rooms_seats": 31,
+			"maxSeats": 31
+		},
+		{
+			"rooms_shortname": "SOWK",
+			"rooms_seats": 31,
+			"maxSeats": 31
+		},
+		{
+			"rooms_shortname": "ANGU",
+			"rooms_seats": 32,
+			"maxSeats": 32
+		},
+		{
+			"rooms_shortname": "BUCH",
+			"rooms_seats": 32,
+			"maxSeats": 32
+		},
+		{
+			"rooms_shortname": "MCML",
+			"rooms_seats": 32,
+			"maxSeats": 32
+		},
+		{
+			"rooms_shortname": "ANSO",
+			"rooms_seats": 33,
+			"maxSeats": 33
+		},
+		{
+			"rooms_shortname": "CEME",
+			"rooms_seats": 34,
+			"maxSeats": 34
+		},
+		{
+			"rooms_shortname": "SCRF",
+			"rooms_seats": 34,
+			"maxSeats": 34
+		},
+		{
+			"rooms_shortname": "ANGU",
+			"rooms_seats": 35,
+			"maxSeats": 35
+		},
+		{
+			"rooms_shortname": "FORW",
+			"rooms_seats": 35,
+			"maxSeats": 35
+		},
+		{
+			"rooms_shortname": "FSC",
+			"rooms_seats": 36,
+			"maxSeats": 36
+		},
+		{
+			"rooms_shortname": "HENN",
+			"rooms_seats": 36,
+			"maxSeats": 36
+		},
+		{
+			"rooms_shortname": "ANGU",
+			"rooms_seats": 37,
+			"maxSeats": 37
+		},
+		{
+			"rooms_shortname": "ANSO",
+			"rooms_seats": 37,
+			"maxSeats": 37
+		},
+		{
+			"rooms_shortname": "SCRF",
+			"rooms_seats": 38,
+			"maxSeats": 38
+		},
+		{
+			"rooms_shortname": "GEOG",
+			"rooms_seats": 39,
+			"maxSeats": 39
+		},
+		{
+			"rooms_shortname": "OSBO",
+			"rooms_seats": 39,
+			"maxSeats": 39
+		},
+		{
+			"rooms_shortname": "BUCH",
+			"rooms_seats": 40,
+			"maxSeats": 40
+		},
+		{
+			"rooms_shortname": "DMP",
+			"rooms_seats": 40,
+			"maxSeats": 40
+		},
+		{
+			"rooms_shortname": "IBLC",
+			"rooms_seats": 40,
+			"maxSeats": 40
+		},
+		{
+			"rooms_shortname": "MCLD",
+			"rooms_seats": 40,
+			"maxSeats": 40
+		},
+		{
+			"rooms_shortname": "MGYM",
+			"rooms_seats": 40,
+			"maxSeats": 40
+		},
+		{
+			"rooms_shortname": "OSBO",
+			"rooms_seats": 40,
+			"maxSeats": 40
+		},
+		{
+			"rooms_shortname": "PCOH",
+			"rooms_seats": 40,
+			"maxSeats": 40
+		},
+		{
+			"rooms_shortname": "SCRF",
+			"rooms_seats": 40,
+			"maxSeats": 40
+		},
+		{
+			"rooms_shortname": "ANGU",
+			"rooms_seats": 41,
+			"maxSeats": 41
+		},
+		{
+			"rooms_shortname": "BUCH",
+			"rooms_seats": 42,
+			"maxSeats": 42
+		},
+		{
+			"rooms_shortname": "GEOG",
+			"rooms_seats": 42,
+			"maxSeats": 42
+		},
+		{
+			"rooms_shortname": "LSK",
+			"rooms_seats": 42,
+			"maxSeats": 42
+		},
+		{
+			"rooms_shortname": "FNH",
+			"rooms_seats": 43,
+			"maxSeats": 43
+		},
+		{
+			"rooms_shortname": "ALRD",
+			"rooms_seats": 44,
+			"maxSeats": 44
+		},
+		{
+			"rooms_shortname": "ANGU",
+			"rooms_seats": 44,
+			"maxSeats": 44
+		},
+		{
+			"rooms_shortname": "FORW",
+			"rooms_seats": 44,
+			"maxSeats": 44
+		},
+		{
+			"rooms_shortname": "CEME",
+			"rooms_seats": 45,
+			"maxSeats": 45
+		},
+		{
+			"rooms_shortname": "MCML",
+			"rooms_seats": 47,
+			"maxSeats": 47
+		},
+		{
+			"rooms_shortname": "SWNG",
+			"rooms_seats": 47,
+			"maxSeats": 47
+		},
+		{
+			"rooms_shortname": "BUCH",
+			"rooms_seats": 48,
+			"maxSeats": 48
+		},
+		{
+			"rooms_shortname": "MATH",
+			"rooms_seats": 48,
+			"maxSeats": 48
+		},
+		{
+			"rooms_shortname": "ORCH",
+			"rooms_seats": 48,
+			"maxSeats": 48
+		},
+		{
+			"rooms_shortname": "UCLL",
+			"rooms_seats": 48,
+			"maxSeats": 48
+		},
+		{
+			"rooms_shortname": "ALRD",
+			"rooms_seats": 50,
+			"maxSeats": 50
+		},
+		{
+			"rooms_shortname": "BUCH",
+			"rooms_seats": 50,
+			"maxSeats": 50
+		},
+		{
+			"rooms_shortname": "EOSM",
+			"rooms_seats": 50,
+			"maxSeats": 50
+		},
+		{
+			"rooms_shortname": "IBLC",
+			"rooms_seats": 50,
+			"maxSeats": 50
+		},
+		{
+			"rooms_shortname": "IONA",
+			"rooms_seats": 50,
+			"maxSeats": 50
+		},
+		{
+			"rooms_shortname": "LASR",
+			"rooms_seats": 51,
+			"maxSeats": 51
+		},
+		{
+			"rooms_shortname": "ANGU",
+			"rooms_seats": 53,
+			"maxSeats": 53
+		},
+		{
+			"rooms_shortname": "ANGU",
+			"rooms_seats": 54,
+			"maxSeats": 54
+		},
+		{
+			"rooms_shortname": "FNH",
+			"rooms_seats": 54,
+			"maxSeats": 54
+		},
+		{
+			"rooms_shortname": "HEBB",
+			"rooms_seats": 54,
+			"maxSeats": 54
+		},
+		{
+			"rooms_shortname": "UCLL",
+			"rooms_seats": 55,
+			"maxSeats": 55
+		},
+		{
+			"rooms_shortname": "BUCH",
+			"rooms_seats": 56,
+			"maxSeats": 56
+		},
+		{
+			"rooms_shortname": "ANGU",
+			"rooms_seats": 58,
+			"maxSeats": 58
+		},
+		{
+			"rooms_shortname": "ANGU",
+			"rooms_seats": 60,
+			"maxSeats": 60
+		},
+		{
+			"rooms_shortname": "CHBE",
+			"rooms_seats": 60,
+			"maxSeats": 60
+		},
+		{
+			"rooms_shortname": "GEOG",
+			"rooms_seats": 60,
+			"maxSeats": 60
+		},
+		{
+			"rooms_shortname": "LASR",
+			"rooms_seats": 60,
+			"maxSeats": 60
+		},
+		{
+			"rooms_shortname": "MATH",
+			"rooms_seats": 60,
+			"maxSeats": 60
+		},
+		{
+			"rooms_shortname": "MCLD",
+			"rooms_seats": 60,
+			"maxSeats": 60
+		},
+		{
+			"rooms_shortname": "SCRF",
+			"rooms_seats": 60,
+			"maxSeats": 60
+		},
+		{
+			"rooms_shortname": "CEME",
+			"rooms_seats": 62,
+			"maxSeats": 62
+		},
+		{
+			"rooms_shortname": "FORW",
+			"rooms_seats": 63,
+			"maxSeats": 63
+		},
+		{
+			"rooms_shortname": "BUCH",
+			"rooms_seats": 65,
+			"maxSeats": 65
+		},
+		{
+			"rooms_shortname": "FSC",
+			"rooms_seats": 65,
+			"maxSeats": 65
+		},
+		{
+			"rooms_shortname": "SPPH",
+			"rooms_seats": 66,
+			"maxSeats": 66
+		},
+		{
+			"rooms_shortname": "ANGU",
+			"rooms_seats": 68,
+			"maxSeats": 68
+		},
+		{
+			"rooms_shortname": "SOWK",
+			"rooms_seats": 68,
+			"maxSeats": 68
+		},
+		{
+			"rooms_shortname": "ANGU",
+			"rooms_seats": 70,
+			"maxSeats": 70
+		},
+		{
+			"rooms_shortname": "BRKX",
+			"rooms_seats": 70,
+			"maxSeats": 70
+		},
+		{
+			"rooms_shortname": "GEOG",
+			"rooms_seats": 72,
+			"maxSeats": 72
+		},
+		{
+			"rooms_shortname": "MCML",
+			"rooms_seats": 72,
+			"maxSeats": 72
+		},
+		{
+			"rooms_shortname": "ORCH",
+			"rooms_seats": 72,
+			"maxSeats": 72
+		},
+		{
+			"rooms_shortname": "PHRM",
+			"rooms_seats": 72,
+			"maxSeats": 72
+		},
+		{
+			"rooms_shortname": "MCML",
+			"rooms_seats": 74,
+			"maxSeats": 74
+		},
+		{
+			"rooms_shortname": "LSK",
+			"rooms_seats": 75,
+			"maxSeats": 75
+		},
+		{
+			"rooms_shortname": "BIOL",
+			"rooms_seats": 76,
+			"maxSeats": 76
+		},
+		{
+			"rooms_shortname": "BUCH",
+			"rooms_seats": 78,
+			"maxSeats": 78
+		},
+		{
+			"rooms_shortname": "ANGU",
+			"rooms_seats": 80,
+			"maxSeats": 80
+		},
+		{
+			"rooms_shortname": "DMP",
+			"rooms_seats": 80,
+			"maxSeats": 80
+		},
+		{
+			"rooms_shortname": "ESB",
+			"rooms_seats": 80,
+			"maxSeats": 80
+		},
+		{
+			"rooms_shortname": "LASR",
+			"rooms_seats": 80,
+			"maxSeats": 80
+		},
+		{
+			"rooms_shortname": "MCLD",
+			"rooms_seats": 84,
+			"maxSeats": 84
+		},
+		{
+			"rooms_shortname": "WOOD",
+			"rooms_seats": 88,
+			"maxSeats": 88
+		},
+		{
+			"rooms_shortname": "ANSO",
+			"rooms_seats": 90,
+			"maxSeats": 90
+		},
+		{
+			"rooms_shortname": "CHEM",
+			"rooms_seats": 90,
+			"maxSeats": 90
+		},
+		{
+			"rooms_shortname": "ALRD",
+			"rooms_seats": 94,
+			"maxSeats": 94
+		},
+		{
+			"rooms_shortname": "CHBE",
+			"rooms_seats": 94,
+			"maxSeats": 94
+		},
+		{
+			"rooms_shortname": "LASR",
+			"rooms_seats": 94,
+			"maxSeats": 94
+		},
+		{
+			"rooms_shortname": "FNH",
+			"rooms_seats": 99,
+			"maxSeats": 99
+		},
+		{
+			"rooms_shortname": "FSC",
+			"rooms_seats": 99,
+			"maxSeats": 99
+		},
+		{
+			"rooms_shortname": "LSC",
+			"rooms_seats": 350,
+			"maxSeats": 350
+		},
+		{
+			"rooms_shortname": "HEBB",
+			"rooms_seats": 375,
+			"maxSeats": 375
+		},
+		{
+			"rooms_shortname": "OSBO",
+			"rooms_seats": 442,
+			"maxSeats": 442
+		}
+	]
+}

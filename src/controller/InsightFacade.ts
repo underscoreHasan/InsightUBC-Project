@@ -46,6 +46,7 @@ export default class InsightFacade implements IInsightFacade {
 	public async removeDataset(id: string): Promise<string> {
 		await addCacheToMemory(this.datasetHandler.getDatasets(), this.datasetHandler.getDatasetIDs());
 		const regex = new RegExp("^[^_]+$");
+
 		if (!(regex.test(id) && id.trim().length !== 0)) {
 			throw new InsightError("Invalid ID provided for removal");
 		}
@@ -67,6 +68,8 @@ export default class InsightFacade implements IInsightFacade {
 	}
 
 	public async performQuery(query: any): Promise<InsightResult[]> {
+		await addCacheToMemory(this.datasetHandler.getDatasets(), this.datasetHandler.getDatasetIDs());
+
 		const curDatasetID: string = this.validateAndPrepareQuery(query);
 		const sections = this.getData(curDatasetID);
 		const filteredResults = this.filterResults(query.WHERE, sections, curDatasetID);
