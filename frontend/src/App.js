@@ -3,6 +3,10 @@ import logo from "./assets/ubc-logo.jpg";
 import "./App.css";
 import { Provider } from "./components/ui/provider";
 import { VStack, Image, Button } from "@chakra-ui/react";
+import AddButton from "./components/AddButton";
+import RemoveButton from "./components/RemoveButton";
+import ListButton from "./components/ListButton";
+import InsightsButton from "./components/InsightsButton";
 
 function App() {
 	const [showOptionsMenu, setShowOptionsMenu] = useState(false); // State to toggle the view
@@ -27,10 +31,10 @@ function App() {
 function OptionsMenu() {
 	return (
 		<>
-			<Button>Add Dataset</Button>
-			<Button>Remove Dataset</Button>
-			<Button>List Dataset</Button>
-			<Button>Dataset Insights</Button>
+			<AddButton></AddButton>
+			<RemoveButton></RemoveButton>
+			<ListButton></ListButton>
+			<InsightsButton></InsightsButton>
 		</>
 	);
 }
