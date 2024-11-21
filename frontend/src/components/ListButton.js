@@ -2,14 +2,15 @@ import React from "react";
 import { Button } from "@chakra-ui/react";
 import axios from "axios";
 
-function ListButton() {
-
+function ListButton({ fetchDatasets }) {
 	const handleList = async () => {
+		await fetchDatasets();
 		try {
 			const response = await axios.get("http://localhost:4321/datasets");
 
 			if (response.status === 200) {
 				const datasets = response.data.result || [];
+
 				if (datasets.length === 0) {
 					alert("No datasets available.");
 				} else {
