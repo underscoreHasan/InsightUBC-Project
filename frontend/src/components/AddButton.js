@@ -21,11 +21,9 @@ function AddButton({ fetchDatasets }) {
 		}
 
 		try {
-			const response = await axios.put(
-				`http://localhost:4321/dataset/${datasetName}/sections`,
-				file,
-				{ headers: { "Content-Type": "application/octet-stream" } }
-			);
+			const response = await axios.put(`http://localhost:4321/dataset/${datasetName}/sections`, file, {
+				headers: { "Content-Type": "application/octet-stream" },
+			});
 
 			if (response.status === 200) {
 				await fetchDatasets(); // Update dataset list
@@ -38,8 +36,10 @@ function AddButton({ fetchDatasets }) {
 
 	return (
 		<VStack spacing={4} align="stretch">
-			<Text fontSize="lg" fontWeight="bold">Upload Dataset</Text>
-			<Input type="file" onChange={handleFileChange} accept="application/json" />
+			<Text fontSize="lg" fontWeight="bold">
+				Upload Dataset
+			</Text>
+			<Input type="file" onChange={handleFileChange} accept="application/zip" />
 			<Input placeholder="Enter dataset name" value={datasetName} onChange={handleNameChange} />
 			<Button colorScheme="blue" onClick={handleSubmit}>
 				Upload Dataset

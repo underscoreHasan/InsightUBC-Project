@@ -1,111 +1,100 @@
 const query1 = {
-	"WHERE": {
-		"IS": {
-			"datasetName_dept": "*"
-		}
+	WHERE: {
+		IS: {
+			datasetName_dept: "*",
+		},
 	},
-	"OPTIONS": {
-		"COLUMNS": [
-			"datasetName_dept",
-			"avg"
-		],
-		"ORDER": {
-			"dir": "DOWN",
-			"keys": ["datasetName_dept"]
-		}
+	OPTIONS: {
+		COLUMNS: ["datasetName_dept", "avg"],
+		ORDER: {
+			dir: "DOWN",
+			keys: ["datasetName_dept"],
+		},
 	},
-	"TRANSFORMATIONS": {
-		"GROUP": ["datasetName_dept"],
-		"APPLY": [
+	TRANSFORMATIONS: {
+		GROUP: ["datasetName_dept"],
+		APPLY: [
 			{
-				"avg": {
-					"AVG": "datasetName_avg"
-				}
-			}
-		]
-	}
+				avg: {
+					AVG: "datasetName_avg",
+				},
+			},
+		],
+	},
 };
 
 const query2 = {
-	"WHERE": {
-		"IS": {
-			"datasetName_dept": "*"
-		}
+	WHERE: {
+		IS: {
+			datasetName_dept: "*",
+		},
 	},
-	"OPTIONS": {
-		"COLUMNS": [
-			"datasetName_dept",
-			"numFails"
-		],
-		"ORDER": {
-			"dir": "DOWN",
-			"keys": ["numFails"]
-		}
+	OPTIONS: {
+		COLUMNS: ["datasetName_dept", "numFails"],
+		ORDER: {
+			dir: "DOWN",
+			keys: ["numFails"],
+		},
 	},
-	"TRANSFORMATIONS": {
-		"GROUP": ["datasetName_dept"],
-		"APPLY": [
+	TRANSFORMATIONS: {
+		GROUP: ["datasetName_dept"],
+		APPLY: [
 			{
-				"numFails": {
-					"COUNT": "datasetName_fail"
-				}
-			}
-		]
-	}
+				numFails: {
+					COUNT: "datasetName_fail",
+				},
+			},
+		],
+	},
 };
 
 const query3 = {
-	"WHERE": {
-		"OR": [
+	WHERE: {
+		OR: [
 			{
-				"IS": {
-					"datasetName_dept": "math"
-				}
+				IS: {
+					datasetName_dept: "math",
+				},
 			},
 			{
-				"IS": {
-					"datasetName_dept": "cpsc"
-				}
+				IS: {
+					datasetName_dept: "cpsc",
+				},
 			},
 			{
-				"IS": {
-					"datasetName_dept": "stat"
-				}
-			}
-		]
-	},
-	"OPTIONS": {
-		"COLUMNS": [
-			"datasetName_dept",
-			"numFails",
-			"numPass",
-			"numAudits"
+				IS: {
+					datasetName_dept: "stat",
+				},
+			},
 		],
-		"ORDER": {
-			"dir": "DOWN",
-			"keys": ["datasetName_dept"]
-		}
 	},
-	"TRANSFORMATIONS": {
-		"GROUP": ["datasetName_dept"],
-		"APPLY": [
+	OPTIONS: {
+		COLUMNS: ["datasetName_dept", "numFails", "numPass", "numAudits"],
+		ORDER: {
+			dir: "DOWN",
+			keys: ["datasetName_dept"],
+		},
+	},
+	TRANSFORMATIONS: {
+		GROUP: ["datasetName_dept"],
+		APPLY: [
 			{
-				"numFails": {
-					"COUNT": "datasetName_fail"
-				}
+				numFails: {
+					COUNT: "datasetName_fail",
+				},
 			},
 			{
-				"numPass": {
-					"COUNT": "datasetName_pass"
-				}
+				numPass: {
+					COUNT: "datasetName_pass",
+				},
 			},
 			{
-				"numAudits": {
-					"COUNT": "datasetName_audit"
-				}
-			}
-		]
-	}
+				numAudits: {
+					COUNT: "datasetName_audit",
+				},
+			},
+		],
+	},
 };
 
 // Function to replace 'datasetName' in the query objects
@@ -124,7 +113,8 @@ function BuildQueries(datasetName) {
 	const modifiedQuery2 = replaceDatasetName(query2, datasetName);
 	const modifiedQuery3 = replaceDatasetName(query3, datasetName);
 
-	return modifiedQuery1;
+	const results = [modifiedQuery1, modifiedQuery2, modifiedQuery3];
+	return results;
 }
 
 export default BuildQueries;
