@@ -21,7 +21,7 @@ export class ServerHandler {
 				return res.status(StatusCodes.OK).json({ result: result });
 			} catch (err: any) {
 				Log.error("Error with calling fn" + err);
-				const errorObj = { error: "Error with fn" };
+				const errorObj = { error:err.message };
 				return res.status(StatusCodes.BAD_REQUEST).json(errorObj);
 			}
 		} catch (error) {
